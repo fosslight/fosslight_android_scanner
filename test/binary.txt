@@ -1,0 +1,7 @@
+system/bin/atrace
+system/bin/awk
+system/bin/bmgr
+system/bin/bu
+build_imtermediate_file/test_sample.jar
+system/lib/vndk-sp/libc++.so
+libbrillo.so

@@ -1,0 +1,14 @@
+{
+    "Prohibited_File_Names":[
+       "key_file",
+       "confidential_key"
+    ],
+    "Prohibited_File_Extensions":[
+       "exe",
+       "jar"
+    ],
+    "Prohibited_Path":[
+       "confidential",
+       ".git"
+    ]
+ }
