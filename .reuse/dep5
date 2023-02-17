@@ -29,3 +29,15 @@ License: Apache-2.0
 Files: .gitignore
 Copyright: 2023 LG Electronics
 License: Apache-2.0
+
+Files: src/fosslight_android/resources/*
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: script/generate-notice-files.py
+Copyright: 2012 The Android Open Source Project
+License: Apache-2.0
+
+Files: tox.ini
+Copyright: 2023 LG Electronics
+License: Apache-2.0
