@@ -38,6 +38,6 @@ if __name__ == "__main__":
         entry_points={
             "console_scripts": [
                 "fosslight_android = fosslight_android.android_binary_analysis:main"
-                ]
-            }
+            ]
+        }
     )

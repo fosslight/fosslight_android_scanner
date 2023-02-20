@@ -46,11 +46,9 @@ def run_notice_html_checklist(binary_file, check_type, notice_file):
 
 def find_bin_in_notice(binary_file_name, notice_file_list):
     notice_found = False
-    notice_matched = ""
     if binary_file_name:
         if binary_file_name in notice_file_list:
             notice_found = True
-            notice_matched = binary_file_name
         else:
             apex_name_search_list = []
             try:
@@ -59,15 +57,15 @@ def find_bin_in_notice(binary_file_name, notice_file_list):
                 if m:
                     apex_name = m.group(1)
                 if apex_name:
-                    apex_name_search_list = [f"{apex_name}.apex", f"{apex_name}.capex", f"{apex_name}_compressed.apex", f"{apex_name}-uncompressed.apex"]
+                    apex_name_search_list = [f"{apex_name}.apex", f"{apex_name}.capex",
+                                             f"{apex_name}_compressed.apex", f"{apex_name}-uncompressed.apex"]
             except Exception as error:
-                pass
+                logger.debug(f"find_bin_in_notice :{error}")
             binary_without_path = os.path.basename(binary_file_name)
             for key in notice_file_list:
                 key_file_name = os.path.basename(key)
                 if key_file_name == binary_without_path or any(apex_name == key_file_name for apex_name in apex_name_search_list):
                     notice_found = True
-                    notice_matched = key_file_name
                     break
 
     return notice_found
@@ -295,7 +293,7 @@ def create_license_txt_files(file_list, result_file_path):
                 os.makedirs(dir)
             write_txt_file(file_name, file['license_txt'], "")
     except Exception as error:
-        logger.warn("Error: Cannot create a notice file.:"+str(error))
+        logger.warn(f"Error: Cannot create a notice file.:{error}")
 
 
 def parsing_notice_html_for_license_text(notice_file_content):

@@ -1,0 +1,43 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: FOSSLight Yocto
+Source: https://github.com/fosslight/fosslight_yocto
+
+Files: *.md
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: test/*
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: .github/*
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: MANIFEST.in
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: requirements*.txt
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: .bumpversion.cfg
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: .gitignore
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: src/fosslight_android/resources/*
+Copyright: 2023 LG Electronics
+License: Apache-2.0
+
+Files: script/generate-notice-files.py
+Copyright: 2012 The Android Open Source Project
+License: Apache-2.0
+
+Files: tox.ini
+Copyright: 2023 LG Electronics
+License: Apache-2.0

@@ -51,9 +51,9 @@ def get_oss_info_from_db(platform_version, bin_info_list, return_list):
                 bin_file_name = os.path.basename(bin_file)
                 # Get OSS Information From Binary DB by matching checksum , filename, tlsh
                 df_result, item_comment, is_new = get_oss_info_by_tlsh_and_filename(bin_file_name,
-                                                                            checksum_value, tlsh_value,
-                                                                            item.source_code_path,
-                                                                            platform_version, conn, cur)
+                                                                                    checksum_value, tlsh_value,
+                                                                                    item.source_code_path,
+                                                                                    platform_version, conn, cur)
                 item.set_comment(item_comment)
                 item.is_new_bin = is_new
                 if df_result is not None and len(df_result) > 0:
@@ -112,7 +112,7 @@ def get_oss_info_by_tlsh_and_filename(file_name, checksum_value, tlsh_value, sou
                             matched_tlsh = row
                             break
                 except Exception as error:  # TLSH COMPARISON FAILED
-                    logger.debug("Comparing TLSH:"+str(error))
+                    logger.debug(f"Comparing TLSH:{error}")
 
             if matched_tlsh != "":
                 final_result_item = get_list_by_using_query(

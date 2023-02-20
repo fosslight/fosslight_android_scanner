@@ -60,7 +60,6 @@ class AndroidBinary:
         self.additional_oss_items = []
         self.is_new_bin = True
 
-
     def __del__(self):
         pass
 
@@ -126,22 +125,20 @@ class AndroidBinary:
         source_path = self.source_code_path
         item_license = self.license
 
-        need_check, comment = get_comment(self.comment, item_license, oss_name, self.notice, source_path)
-        print_items_txt.append(
-            self.bin_name + '\t' + source_path + '\t' + self.notice +
-            '\t' + oss_name + '\t' + self.oss_version + '\t' +
-            self.license + '\t' + need_check + '\t' + comment +
-            '\t' + self.tlsh + '\t' + self.checksum)
+        empty_columns, license_to_notice = check_empty_column(item_license, oss_name, source_path)
+        comment = get_comment(self.comment, license_to_notice, self.notice, empty_columns)
+        if comment != "":
+            need_check = "O"
+        print_items_txt.append(f"{self.bin_name}\t{source_path}\t{self.notice}\t"
+                               f"{oss_name}\t{self.oss_version}\t{self.license}\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
         repo_link = self.download_location if self.is_new_bin else ""
         print_items_excel.append([self.bin_name, source_path, self.notice, oss_name,
                                   self.oss_version, self.license, repo_link, repo_link, '', '', '', comment, need_check])
 
         if self.additional_oss_items is not None:
             for item in self.additional_oss_items:
-                print_items_txt.append(
-                    self.bin_name + '\t' + source_path + '\t' + self.notice +
-                    '\t' + item + '\t' + need_check + '\t' + comment +
-                    '\t' + self.tlsh + '\t' + self.checksum)
+                print_items_txt.append(f"{self.bin_name}\t{source_path}\t{self.notice}\t{item}"
+                                       f"\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
                 excel_item = [self.bin_name, source_path, self.notice]
                 excel_item.extend(item.split('\t'))
                 excel_item.extend(['', '', '', '', '', comment, need_check])
@@ -149,24 +146,26 @@ class AndroidBinary:
         return print_items_txt, print_items_excel
 
 
-def get_comment(default_comment, license, oss_name, notice_value, directory):
-    need_check = ""
-    comment = ""
+def check_empty_column(license, oss_name, directory):
     empty_columns = []
     license_to_notice = True
 
-    if license == CONST_NULL:
-        empty_columns.append('License')
-    else:
+    if license != CONST_NULL:
         for license_item in license.split(','):
             if license_item in skip_license:
                 license_to_notice = False
                 break
-
+    else:
+        empty_columns.append('License')
     if oss_name == CONST_NULL and license_to_notice:
         empty_columns.append('OSS Name')
     if directory == CONST_NULL:
         empty_columns.append('Source Code Path')
+    return empty_columns, license_to_notice
+
+
+def get_comment(default_comment, license_to_notice, notice_value, empty_columns):
+    comment = ""
 
     if empty_columns is not None and len(empty_columns) > 0:
         comment = "Fill in " + ",".join(empty_columns) + "."
@@ -181,12 +180,9 @@ def get_comment(default_comment, license, oss_name, notice_value, directory):
             comment += "/"
         comment += "Add NOTICE to proper path."
 
-    if comment != "":
-        need_check = "O"
-
     comment = default_comment + comment  # Paste Auto ID comment in front.
 
-    return need_check, comment
+    return comment
 
 
 def set_value_switch(bin, key, value):
