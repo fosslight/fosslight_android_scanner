@@ -35,8 +35,7 @@ def write_txt_file(file_name, str_to_write, run_command_dir):
         f.write(str_to_write)
         f.close()
     except Exception as error:
-        logger.info("Failed to write text:"+file_to_create)
-        logger.info(str(error))
+        logger.info(f"Failed to write text:{file_to_create}\n{error}")
 
 
 def get_path_by_using_find(file_list_to_find, build_out_path, result_file, run_command_dir):
@@ -68,4 +67,4 @@ def get_path_by_using_find(file_list_to_find, build_out_path, result_file, run_c
             str_report = search_time + "\r\n" + str_report
             write_txt_file(result_file, str_report, run_command_dir)
         except Exception as error:
-            logger.error("FIND Command:"+str(error))
+            logger.error(f"FIND Command:{error}")

@@ -112,7 +112,7 @@ def get_oss_info_by_tlsh_and_filename(file_name, checksum_value, tlsh_value, sou
                             matched_tlsh = row
                             break
                 except Exception as error:  # TLSH COMPARISON FAILED
-                    logger.debug("Comparing TLSH:"+str(error))
+                    logger.debug(f"Comparing TLSH:{error}")
 
             if matched_tlsh != "":
                 final_result_item = get_list_by_using_query(
