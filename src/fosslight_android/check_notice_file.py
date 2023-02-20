@@ -293,7 +293,7 @@ def create_license_txt_files(file_list, result_file_path):
                 os.makedirs(dir)
             write_txt_file(file_name, file['license_txt'], "")
     except Exception as error:
-        logger.warn("Error: Cannot create a notice file.:"+str(error))
+        logger.warn(f"Error: Cannot create a notice file.:{error}")
 
 
 def parsing_notice_html_for_license_text(notice_file_content):

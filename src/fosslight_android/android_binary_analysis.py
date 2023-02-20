@@ -243,19 +243,19 @@ def find_binaries_from_out_dir():
     obj_static_lib = os.path.join(build_out_path, "obj/STATIC_LIBRARIES")
     font_path = os.path.join(build_out_path, "system/fonts")
     cmd_list = [
-        "find " + system_path + " -type f -exec file \"{}\" \\; | " +
-        "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | " +
+        "find " + system_path + " -type f -exec file \"{}\" \\; | "
+        "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | "
         "grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\'",
-        "find " + root_path + " -type f -exec file \"{}\" \\; | " +
+        "find " + root_path + " -type f -exec file \"{}\" \\; | "
         "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | awk -F\":\" \'{print $1}\' ",
-        "find " + build_out_path + " -maxdepth 1 -type f -exec file \"{}\" \\; | grep data$ |" +
+        "find " + build_out_path + " -maxdepth 1 -type f -exec file \"{}\" \\; | grep data$ |"
         " grep -v .img  | awk -F\":\" \'{print $1}\' ",
         "find " + obj_static_lib + " -type f -exec file \"{}\" \\; | egrep \"ar archive\" | awk -F\":\" \'{print $1}\' ",
-        "find " + build_out_path + "  ! \\( \\( -type d -path " + system_path +
-        " -o -path " + root_path + " -o -path \'" + build_out_path +
-        "/obj*\' -o -path " + build_out_path + "/symbols -o -path \'" +
-        build_out_path + "/factory_*\' -o -path " + build_out_path +
-        "/dex_bootjars \\) -prune \\)  -type f -exec file \"{}\" \\; | egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | " +
+        f"find {build_out_path} ! \\( \\( -type d -path {system_path}"
+        f" -o -path {root_path} -o -path \'{build_out_path}"
+        f"/obj*\' -o -path {build_out_path}/symbols -o -path \'"
+        f"{build_out_path}/factory_*\' -o -path {build_out_path}"
+        "/dex_bootjars \\) -prune \\)  -type f -exec file \"{}\" \\; | egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | "
         "grep -v \"\\.o:\" | grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\' ",
         "find " + font_path + " -type f -exec file \"{}\" \\; | egrep \"font\" | awk -F\":\" \'{print $1}\'"
     ]
@@ -419,7 +419,7 @@ def filter_non_path_bin(FIND_DIRECTORY_MODE):
             pass
 
     if FIND_DIRECTORY_MODE:
-        get_path_by_using_find(need_to_find, build_out_path, "FIND_RESULT_OF_BINARIES"+now+".txt", python_script_dir)
+        get_path_by_using_find(need_to_find, build_out_path, f"FIND_RESULT_OF_BINARIES_{now}.txt", python_script_dir)
 
 
 def search_binaries_by_bin_name_and_checksum(bin_name_to_search, bin_checksum_to_search):
@@ -475,7 +475,7 @@ def get_repositories_name_from_web():
             pkg_list = soup.findAll("span", "RepoList-itemName")
 
             for pkg in pkg_list:
-                repositories[pkg.text] = url+pkg.text
+                repositories[pkg.text] = url + pkg.text
         except Exception:
             pass
 
@@ -606,7 +606,7 @@ def get_checksum_tlsh(bin_info_list, return_bin_list):
 
 def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
     global final_bin_info
-    result_file_name = "REMOVED_BIN_BY_DUPLICATION_"+now+".txt"
+    result_file_name = f"REMOVED_BIN_BY_DUPLICATION_{now}.txt"
     str_bin_removed = ""
     filtered_binaries = []
     checked_file_name = {}
@@ -633,7 +633,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
             cnt += 1
             print_removed_str, print_removed_array = item.get_print_items()
             for row_removed in print_removed_str:
-                str_bin_removed += row_removed+'\n'
+                str_bin_removed += f"{row_removed}\n"
             continue
         elif search_key not in checked_file_name:
             find_result, same_name_binaries = search_binaries_by_bin_name_and_checksum(bin_name_with_path,
@@ -677,7 +677,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
                     if bin_same_name.bin_name != final_added.bin_name:
                         print_removed_str, print_removed_array = bin_same_name.get_print_items()
                         for row_removed in print_removed_str:
-                            str_bin_removed += row_removed+'\n'
+                            str_bin_removed += f"{row_removed}\n"
             else:  # Don't have any duplicated binaries
                 filtered_binaries.append(item)
     if remove_list_file != "":
