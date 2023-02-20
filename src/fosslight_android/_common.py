@@ -60,7 +60,6 @@ class AndroidBinary:
         self.additional_oss_items = []
         self.is_new_bin = True
 
-
     def __del__(self):
         pass
 

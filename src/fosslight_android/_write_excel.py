@@ -45,7 +45,7 @@ def create_worksheet(workbook, sheet_name, header_row):
 def write_result_to_txt_and_excel(out_excel_file, final_bin_info, out_txt_file):
     excel_list = []
     final_str = ['Binary Name\tSource Code Path\tNOTICE.html\tOSS Name\tOSS Version\tLicense\tNeed '
-                'Check\tComment\ttlsh\tchecksum']
+                 'Check\tComment\ttlsh\tchecksum']
     if final_bin_info:
         for item in sorted(final_bin_info, key=lambda binary: (binary.source_code_path, binary.bin_name)):
             try:
@@ -60,5 +60,3 @@ def write_result_to_txt_and_excel(out_excel_file, final_bin_info, out_txt_file):
         write_result_to_excel(out_excel_file, excel_list)
     else:
         logger.warning("Nothing is detected from the scanner so output file is not generated.")
-
-

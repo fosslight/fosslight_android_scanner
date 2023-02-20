@@ -9,7 +9,6 @@ from datetime import datetime
 import os
 import re
 import json
-import getopt
 import logging
 # Parsing NOTICE
 from bs4 import BeautifulSoup
@@ -54,7 +53,6 @@ from ._help import print_help_msg, print_version
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_binary.binary_analysis import return_bin_only
 import argparse
-import glob
 from pathlib import Path
 
 EXCEPTIONAL_PATH = [r"(/)+gen/META/lic_intermediates/"]
@@ -141,15 +139,15 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
 
     js_value = ""
 
-    if module_name in module_info_json_obj: # Binary Name without extension
+    if module_name in module_info_json_obj:  # Binary Name without extension
         js_value = module_info_json_obj[module_name]
         js_value[MODULE_TYPE_NAME] = module_name
         return js_value
-    elif binary_name_only in module_info_json_obj: # Binary Name
+    elif binary_name_only in module_info_json_obj:  # Binary Name
         js_value = module_info_json_obj[binary_name_only]
         js_value[MODULE_TYPE_NAME] = binary_name_only
         return js_value
-    else: # Find binary by installed path
+    else:  # Find binary by installed path
         for key in module_info_json_obj:
             js_value = module_info_json_obj[key]
             output_files = js_value["installed"]
@@ -330,7 +328,7 @@ def find_notice_value():
     global notice_file_list, final_bin_info
 
     try:
-        notice_file_list, notice_files= read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
+        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
         if not notice_file_list:
             logger.info(f"Notice file is empty:{notice_files}")
             return
@@ -341,7 +339,7 @@ def find_notice_value():
         return_list = do_multi_process(find_notice_html, final_bin_info)
         final_bin_info = return_list[:]
 
-    except IOError as error: # 'CANNOT_FIND_NOTICE_HTML'
+    except IOError as error:  # 'CANNOT_FIND_NOTICE_HTML'
         logger.debug(f"find_notice_value:{error}")
 
 
@@ -643,7 +641,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
             checked_file_name[search_key] = find_result
 
             if find_result:
-                final_added = "" # finally added binary
+                final_added = ""  # finally added binary
                 # 0 : file in system folder, 1: Source Path exists, 2:exist in NOTICE.html, 3: shortest path
                 priority = ["", "", "", ""]
                 idx_notice = 2
@@ -764,8 +762,6 @@ def main():
     _NOTICE_CHECKLIST_TYPE = False
     analyze_source = False
 
-    argv = sys.argv[1:]
-
     num_cores = multiprocessing.cpu_count() - 1
     if num_cores < 1:
         num_cores = 1
@@ -786,7 +782,7 @@ def main():
     parser.add_argument('-n', '--notice', type=str, required=False)
     parser.add_argument('-t', '--toadd', action='store_true', required=False)
     parser.add_argument('-m', '--more', action='store_true', required=False)
-    parser.add_argument('-c', '--check',type=str, required=False)
+    parser.add_argument('-c', '--check', type=str, required=False)
     parser.add_argument('-a', '--android', type=str, required=False)
     parser.add_argument('-f', '--find', action='store_true', required=False)
     parser.add_argument('-i', '--ignore', action='store_true', required=False)
@@ -799,9 +795,9 @@ def main():
         print_help_msg()
     if args.version:
         print_version(PKG_NAME)
-    if args.source: # android source path
+    if args.source:  # android source path
         os.chdir(args.source)
-    if args.binary: # Base model's binary.txt to exclude
+    if args.binary:  # Base model's binary.txt to exclude
         base_binary_txt = args.binary
     if args.notice:
         NOTICE_HTML_FILE_NAME = args.notice

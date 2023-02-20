@@ -8,13 +8,13 @@ _HELP_MESSAGE = """
     Usage: fosslight_android [option1] <arg1> [option2] <arg2>...
 
     List all the binaries loaded on the Android-based model to check which open source is used for each
-    binary, and to check whether the notices are included in the OSS notice. 
+    binary, and to check whether the notices are included in the OSS notice.
     (ex-NOTICE.html: OSS Notice for Android-based model).
 
     Options:
         Mandatory
             -s <android_source_path>\t   Path to analyze
-            -a <build_log_file_name>\t   The file must be located in the android source path. 
+            -a <build_log_file_name>\t   The file must be located in the android source path.
 
         Optional
             -h\t\t\t\t   Print help message
@@ -34,4 +34,3 @@ def print_help_msg():
 
 def print_version(pkg_name):
     print_package_version(pkg_name, "FOSSLight Android Version:")
-
