@@ -768,9 +768,9 @@ def main():
 
     python_script_dir = os.getcwd()
     now = datetime.now().strftime('%y%m%d_%H%M')
-    result_txt_file = os.path.join(python_script_dir, f"fosslight_binary_{now}.txt")
-    log_txt_file = os.path.join(python_script_dir, f"fosslight_log_{now}.txt")
-    result_excel_file = os.path.join(python_script_dir, f"fosslight_report_{now}.xlsx")
+    result_txt_file = os.path.join(python_script_dir, f"fosslight_binary_android_{now}.txt")
+    log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
+    result_excel_file = os.path.join(python_script_dir, f"fosslight_report_android_{now}.xlsx")
     logger, result_log = init_log(log_txt_file, True, logging.INFO, logging.DEBUG, PKG_NAME)
     remove_list_file = ""
 
