@@ -129,6 +129,8 @@ class AndroidBinary:
         comment = get_comment(self.comment, license_to_notice, self.notice, empty_columns)
         if comment != "":
             need_check = "O"
+        else:
+            need_check = ""
         print_items_txt.append(f"{self.bin_name}\t{source_path}\t{self.notice}\t"
                                f"{oss_name}\t{self.oss_version}\t{self.license}\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
         repo_link = self.download_location if self.is_new_bin else ""
