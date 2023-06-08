@@ -10,6 +10,8 @@ from ._util import read_file, write_txt_file
 from ._common import NOTICE_FILE_NAME
 from fosslight_util.constant import LOGGER_NAME
 import re
+import gzip
+import shutil
 
 logger = logging.getLogger(LOGGER_NAME)
 CANNOT_FIND_MSG = "CANNOT_FIND_NOTICE_HTML"
@@ -73,11 +75,24 @@ def find_bin_in_notice(binary_file_name, notice_file_list):
 
 def find_files_by_extension(path):
     extensions = ['.html', '.xml']
+    GZ_EXTENSION = '.gz'
     files = []
+    try:
+        gz_files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(GZ_EXTENSION)]
+        for gz_file in gz_files:
+            unzip_file = gz_file.replace('.gz', '')
+            if not os.path.isfile(unzip_file):
+                with gzip.open(gz_file, 'rb') as f_in:
+                    with open(unzip_file, 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+    except Exception as error:
+        logger.info(f"Fail unzip gz file:{error}")
+
     for extension in extensions:
         files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(extension)]
         if len(files) > 0:
             break
+
     return files
 
 
