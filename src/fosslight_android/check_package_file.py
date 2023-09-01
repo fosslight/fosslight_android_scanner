@@ -11,6 +11,7 @@ import os
 import logging
 import json
 import sys
+import contextlib
 from datetime import datetime
 from ._util import read_file
 from fosslight_util.constant import LOGGER_NAME
@@ -126,13 +127,11 @@ def extract_file(fname):
 
         # Unzip the file.
         if fname.endswith(".tar.gz"):
-            tar = tarfile.open(fname, "r:gz")
-            tar.extractall(path=extract_path)
-            tar.close()
+            with contextlib.closing(tarfile.open(fname, "r:gz")) as t:
+                t.extractall(path=extract_path)
         elif fname.endswith(".tar"):
-            tar = tarfile.open(fname, "r:")
-            tar.extractall(path=extract_path)
-            tar.close()
+            with contextlib.closing(tarfile.open(fname, "r:")) as t:
+                t.extractall(path=extract_path)
         elif fname.endswith(".zip"):
             return unzip(fname, extract_path)
         else:

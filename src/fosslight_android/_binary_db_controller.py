@@ -14,12 +14,15 @@ logger = logging.getLogger(LOGGER_NAME)
 columns = ['filename', 'pathname', 'checksum', 'tlshchecksum', 'ossname', 'ossversion', 'license', 'platformname',
            'platformversion']
 
+DB_USER = 'bin_analysis_script_user'
+DB_PSWD = 'script_123'
+
 
 def connect_to_lge_bin_db():
     conn = ""
     cur = ""
-    user = 'bin_analysis_script_user'
-    password = 'script_123'
+    user = DB_USER
+    password = DB_PSWD
     host_product = 'bat.lge.com'
     dbname = 'bat'
     port = '5432'
@@ -73,29 +76,29 @@ def get_oss_info_from_db(platform_version, bin_info_list, return_list):
 
 def get_oss_info_by_tlsh_and_filename(file_name, checksum_value, tlsh_value, source_path, platform_version, conn, cur):
     sql_statement = "SELECT filename,pathname,checksum,tlshchecksum,ossname,ossversion,license,platformname,platformversion FROM lgematching "
-    sql_statement_checksum = " WHERE filename='{fname}' AND checksum='{checksum}';".format(fname=file_name,
-                                                                                           checksum=checksum_value)  # Checking checksum first.
-    sql_statement_filename = "SELECT tlshchecksum FROM lgematching WHERE filename='{fname}' AND tlshchecksum <> '0' ORDER BY ( " \
+    sql_statement_checksum = " WHERE filename=%(fname)s AND checksum=%(checksum)s;"
+    sql_checksum_params = {'fname': file_name, 'checksum': checksum_value}
+    sql_statement_filename = "SELECT tlshchecksum FROM lgematching WHERE filename=%(fname)s AND tlshchecksum <> '0' ORDER BY ( " \
                              "CASE " \
-                             "WHEN sourcepath = '{src_path}' AND lower(platformname)='{plat_name}' " \
-                             "AND platformversion='{plat_version}' THEN 1 " \
-                             "WHEN sourcepath = '{src_path}' AND lower(platformname)='{plat_name}' THEN 2 " \
-                             "WHEN lower(platformname)='{plat_name}' AND platformversion='{plat_version}' THEN 3 " \
-                             "WHEN lower(platformname)='{plat_name}' THEN 4 " \
+                             "WHEN sourcepath = %(src_path)s AND lower(platformname)=%(plat_name)s " \
+                             "AND platformversion=%(plat_version)s THEN 1 " \
+                             "WHEN sourcepath = %(src_path)s AND lower(platformname)=%(plat_name)s THEN 2 " \
+                             "WHEN lower(platformname)=%(plat_name)s AND platformversion=%(plat_version)s THEN 3 " \
+                             "WHEN lower(platformname)=%(plat_name)s THEN 4 " \
                              "ELSE 5 " \
-                             "END), updatedate DESC;".format(fname=file_name, src_path=source_path, plat_version=platform_version,
-                                                             plat_name="android")
+                             "END), updatedate DESC;"
+    sql_filename_params = {'fname': file_name, 'src_path': source_path, 'plat_version': platform_version, 'plat_name': "android"}
     auto_id_comment = ""
     final_result_item = ""
     is_new = False
 
     # Match checksum and fileName
-    df_result = get_list_by_using_query(sql_statement + sql_statement_checksum, columns, conn, cur)
+    df_result = get_list_by_using_query(sql_statement + sql_statement_checksum, sql_checksum_params, columns, conn, cur)
     if df_result is not None and len(df_result) > 0:  # Found a file with the same checksum.
         final_result_item = df_result
     else:  # Can't find files that have same name and checksum
         # Match tlsh and fileName
-        df_result = get_list_by_using_query(sql_statement_filename, ['tlshchecksum'], conn, cur)
+        df_result = get_list_by_using_query(sql_statement_filename, sql_filename_params, ['tlshchecksum'], conn, cur)
         if df_result is None or len(df_result) <= 0:
             final_result_item = ""
             auto_id_comment = "New Binary/"
@@ -116,16 +119,15 @@ def get_oss_info_by_tlsh_and_filename(file_name, checksum_value, tlsh_value, sou
 
             if matched_tlsh != "":
                 final_result_item = get_list_by_using_query(
-                    sql_statement + " WHERE filename='{fname}' AND tlshchecksum='{tlsh}';".format(fname=file_name,
-                                                                                                  tlsh=matched_tlsh),
+                    sql_statement + " WHERE filename=%(fname)s AND tlshchecksum=%(tlsh)s;", {'fname': file_name, 'tlsh': matched_tlsh},
                     columns, conn, cur)
 
     return final_result_item, auto_id_comment, is_new
 
 
-def get_list_by_using_query(sql_query, columns, conn, cur):
+def get_list_by_using_query(sql_query, params, columns, conn, cur):
     result_rows = ""  # DataFrame
-    cur.execute(sql_query)
+    cur.execute(sql_query, params)
     rows = cur.fetchall()
 
     if rows is not None and len(rows) > 0:

@@ -77,7 +77,7 @@ body { padding: 0; font-family: sans-serif; }
 def combine_notice_files_html(file_hash, input_dirs, output_filename):
     """Combine notice files in FILE_HASH and output a HTML version to OUTPUT_FILENAME."""
 
-    SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(input_dirs) + ")(/.*).txt")
+    SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(re.escape(input_dirs)) + ")(/.*).txt")
 
     # Set up a filename to row id table (anchors inside tables don't work in
     # most browsers, but href's to table row ids do)
@@ -135,7 +135,7 @@ def combine_notice_files_html(file_hash, input_dirs, output_filename):
 def combine_notice_files_text(file_hash, input_dirs, output_filename, file_title):
     """Combine notice files in FILE_HASH and output a text version to OUTPUT_FILENAME."""
 
-    SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(input_dirs) + ")(/.*).txt")
+    SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(re.escape(input_dirs)) + ")(/.*).txt")
     output_file = open(output_filename, "wb")
     print >> output_file, file_title
     for value in file_hash:
@@ -150,7 +150,7 @@ def combine_notice_files_text(file_hash, input_dirs, output_filename, file_title
 def combine_notice_files_xml(files_with_same_hash, input_dirs, output_filename):
     """Combine notice files in FILE_HASH and output a XML version to OUTPUT_FILENAME."""
 
-    SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(input_dirs) + ")(/.*).txt")
+    SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(re.escape(input_dirs)) + ")(/.*).txt")
 
     # Set up a filename to row id table (anchors inside tables don't work in
     # most browsers, but href's to table row ids do)
