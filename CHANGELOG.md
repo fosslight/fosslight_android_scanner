@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.1.15 (30/10/2023)
+## Changes
+## 🔧 Maintenance
+
+- Upgrade Python minimum version to 3.8 @JustinWonjaePark (#7)
+- Fix the vulnerability @dd-jy (#6)
+
+---
+
 ## v4.1.14 (09/06/2023)
 ## Changes
 ## 🚀 Features
