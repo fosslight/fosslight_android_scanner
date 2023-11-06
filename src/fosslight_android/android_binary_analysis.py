@@ -771,7 +771,6 @@ def main():
     result_txt_file = os.path.join(python_script_dir, f"fosslight_binary_android_{now}.txt")
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
     result_excel_file = os.path.join(python_script_dir, f"fosslight_report_android_{now}.xlsx")
-    logger, result_log = init_log(log_txt_file, True, logging.INFO, logging.DEBUG, PKG_NAME)
     remove_list_file = ""
 
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
@@ -814,6 +813,9 @@ def main():
         find_empty_path = True
     if args.ignore:  # Disable the function to automatically convert OSS names based on AOSP.
         auto_fill_oss_name = False
+
+    logger, result_log = init_log(log_txt_file, True, logging.INFO, logging.DEBUG, PKG_NAME)
+
     if args.packaging:
         check_packaging_files(args.packaging)
         return
