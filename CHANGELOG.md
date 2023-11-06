@@ -1,5 +1,13 @@
 # Changelog
 
+## v4.1.16 (06/11/2023)
+## Changes
+## 🔧 Maintenance
+
+- Remove unwanted log @JustinWonjaePark (#8)
+
+---
+
 ## v4.1.15 (30/10/2023)
 ## Changes
 ## 🔧 Maintenance
