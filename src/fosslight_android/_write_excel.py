@@ -7,20 +7,23 @@ import xlsxwriter
 import logging
 from fosslight_util.write_txt import write_txt_file
 from fosslight_util.constant import LOGGER_NAME
+from fosslight_util.write_excel import hide_column
 
 logger = logging.getLogger(LOGGER_NAME)
+HIDDEN_HEADER = ['TLSH', 'SHA1']
 
 
 def write_result_to_excel(out_file_name, row_list):
     header_row = ['ID', 'Binary Name', 'Source Code Path', 'NOTICE.html', 'OSS Name', 'OSS Version', 'License',
                   'Download Location', 'Homepage',
                   'Copyright Text',
-                  'License Text', 'Exclude', 'Comment', 'Need Check']
+                  'License Text', 'Exclude', 'Comment', 'Need Check', 'TLSH', 'SHA1']
     sheet_name = "BIN (Android)"
     try:
         workbook = xlsxwriter.Workbook(out_file_name)
         worksheet = create_worksheet(workbook, sheet_name, header_row)
         write_result_to_sheet(worksheet, row_list)
+        hide_column(worksheet, header_row, HIDDEN_HEADER)
         workbook.close()
     except Exception as ex:
         print('* Error :' + str(ex))

@@ -143,7 +143,7 @@ class AndroidBinary:
                                        f"\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
                 excel_item = [self.bin_name, source_path, self.notice]
                 excel_item.extend(item.split('\t'))
-                excel_item.extend(['', '', '', '', '', comment, need_check])
+                excel_item.extend(['', '', '', '', '', comment, need_check, self.tlsh, self.checksum])
                 print_items_excel.append(excel_item)
         return print_items_txt, print_items_excel
 
