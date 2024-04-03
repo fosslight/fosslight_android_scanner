@@ -135,7 +135,8 @@ class AndroidBinary:
                                f"{oss_name}\t{self.oss_version}\t{self.license}\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
         repo_link = self.download_location if self.is_new_bin else ""
         print_items_excel.append([self.bin_name, source_path, self.notice, oss_name,
-                                  self.oss_version, self.license, repo_link, repo_link, '', '', '', comment, need_check])
+                                  self.oss_version, self.license, repo_link, repo_link, '', '', '', comment,
+                                  need_check, self.tlsh, self.checksum])
 
         if self.additional_oss_items is not None:
             for item in self.additional_oss_items:
@@ -143,7 +144,7 @@ class AndroidBinary:
                                        f"\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
                 excel_item = [self.bin_name, source_path, self.notice]
                 excel_item.extend(item.split('\t'))
-                excel_item.extend(['', '', '', '', '', comment, need_check])
+                excel_item.extend(['', '', '', '', '', comment, need_check, self.tlsh, self.checksum])
                 print_items_excel.append(excel_item)
         return print_items_txt, print_items_excel
 
