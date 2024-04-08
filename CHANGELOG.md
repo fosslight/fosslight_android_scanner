@@ -1,5 +1,17 @@
 # Changelog
 
+## v4.1.17 (08/04/2024)
+## Changes
+## 🚀 Features
+
+- Add TLSH, SHA1 column at report @bjk7119 (#10)
+
+## 🔧 Maintenance
+
+- Use common github actions @bjk7119 (#9)
+
+---
+
 ## v4.1.16 (06/11/2023)
 ## Changes
 ## 🔧 Maintenance
