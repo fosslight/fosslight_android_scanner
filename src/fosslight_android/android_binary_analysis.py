@@ -761,6 +761,7 @@ def main():
     auto_fill_oss_name = True
     _NOTICE_CHECKLIST_TYPE = False
     analyze_source = False
+    path_to_exclude = []
 
     num_cores = multiprocessing.cpu_count() - 1
     if num_cores < 1:
@@ -788,6 +789,7 @@ def main():
     parser.add_argument('-p', '--packaging', type=str, required=False)
     parser.add_argument('-d', '--divide', type=str, required=False)
     parser.add_argument('-r', '--remove', type=str, required=False)
+    parser.add_argument('-e', '--exclude', nargs="*", required=False, default=[])
 
     args = parser.parse_args()
     if args.help:
@@ -813,6 +815,8 @@ def main():
         find_empty_path = True
     if args.ignore:  # Disable the function to automatically convert OSS names based on AOSP.
         auto_fill_oss_name = False
+    if args.exclude:  # Path to exclude from source code analysis.
+        path_to_exclude = args.exclude
 
     logger, result_log = init_log(log_txt_file, True, logging.INFO, logging.DEBUG, PKG_NAME)
 
@@ -850,7 +854,7 @@ def main():
         set_oss_name_by_repository()
     if analyze_source:
         from ._src_analysis import find_item_to_analyze
-        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now)
+        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
 
     write_result_to_txt_and_excel(result_excel_file, final_bin_info, result_txt_file)
     result_log["Output FOSSLight Report"] = result_excel_file

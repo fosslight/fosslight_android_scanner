@@ -13,8 +13,7 @@ logger = logging.getLogger(LOGGER_NAME)
 ANALYSIS_OUTPUT_DIR = "source_analyzed"
 
 
-def find_item_to_analyze(bin_info, output_path, start_time=""):
-    logger.info("* START TO ANALYZE SOURCE")
+def find_item_to_analyze(bin_info, output_path, start_time="", path_to_exclude=[]):
     path_list_to_analyze = {}
     for item in bin_info:
         try:
@@ -25,15 +24,25 @@ def find_item_to_analyze(bin_info, output_path, start_time=""):
         except Exception as error:
             logger.debug(f"Find_item_to_analyze:{error}")
 
-    logger.info(f"|--Source analysis begins for {len(path_list_to_analyze)} paths.")
-    idx = 0
+    source_analysis_path = [path for path in path_list_to_analyze.keys() if path not in path_to_exclude]
+    logger.info(f"|--Source analysis for {len(source_analysis_path)} paths.")
+    for path in source_analysis_path:
+        file_array = [len(files) for r, d, files in os.walk(path)]
+        files = sum(file_array)
+        logger.info(f"{path}, File Count:{files}")
+
     output_dir = os.path.join(output_path, f"{ANALYSIS_OUTPUT_DIR}_{start_time}")
-    for source_path in path_list_to_analyze.keys():
+
+    logger.info("------------------------------")
+    logger.info("* START TO ANALYZE SOURCE *")
+    idx = 0
+    for source_path in source_analysis_path:
         try:
             idx += 1
-            logger.info(f"|---{idx} {source_path}")
-            license = run_src_analysis(source_path, start_time, output_dir)
-            path_list_to_analyze[source_path] = license
+            if os.path.isdir(source_path):
+                logger.info(f"({idx}){source_path}")
+                license = run_src_analysis(source_path, start_time, output_dir)
+                path_list_to_analyze[source_path] = license
         except Exception as error:
             logger.debug(f"Failed to run src analysis:{error}")
 

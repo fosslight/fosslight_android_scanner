@@ -19,6 +19,7 @@ _HELP_MESSAGE = """
         Optional
             -h\t\t\t\t   Print help message
             -m\t\t\t\t   Analyze the source code for the path where the license could not be found.
+            -e <path1> <path2..>\t   Path to exclude from source analysis.
             -p\t\t\t\t   Check files that should not be included in the Packaging file.
             -f\t\t\t\t   Print result of Find Command for binary that can not find Source Code Path.
             -t\t\t\t\t   Collect NOTICE for binaries that are not added to NOTICE.html.
