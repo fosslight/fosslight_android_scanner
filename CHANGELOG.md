@@ -1,5 +1,13 @@
 # Changelog
 
+## v4.1.18 (21/05/2024)
+## Changes
+## 🚀 Features
+
+- Add paths to exclude from source analysis @soimkim (#11)
+
+---
+
 ## v4.1.17 (08/04/2024)
 ## Changes
 ## 🚀 Features
