@@ -7,13 +7,13 @@ import xlsxwriter
 import logging
 from fosslight_util.write_txt import write_txt_file
 from fosslight_util.constant import LOGGER_NAME
-from fosslight_util.write_excel import hide_column
+from fosslight_util.write_excel import hide_column, write_cover_sheet
 
 logger = logging.getLogger(LOGGER_NAME)
 HIDDEN_HEADER = ['TLSH', 'SHA1']
 
 
-def write_result_to_excel(out_file_name, row_list):
+def write_result_to_excel(out_file_name, row_list, cover=''):
     header_row = ['ID', 'Binary Name', 'Source Code Path', 'NOTICE.html', 'OSS Name', 'OSS Version', 'License',
                   'Download Location', 'Homepage',
                   'Copyright Text',
@@ -21,6 +21,8 @@ def write_result_to_excel(out_file_name, row_list):
     sheet_name = "BIN (Android)"
     try:
         workbook = xlsxwriter.Workbook(out_file_name)
+        if cover:
+            write_cover_sheet(workbook, cover)
         worksheet = create_worksheet(workbook, sheet_name, header_row)
         write_result_to_sheet(worksheet, row_list)
         hide_column(worksheet, header_row, HIDDEN_HEADER)
@@ -45,7 +47,7 @@ def create_worksheet(workbook, sheet_name, header_row):
     return worksheet
 
 
-def write_result_to_txt_and_excel(out_excel_file, final_bin_info, out_txt_file):
+def write_result_to_txt_and_excel(out_excel_file, final_bin_info, out_txt_file, cover=''):
     excel_list = []
     final_str = ['Binary Name\tSource Code Path\tNOTICE.html\tOSS Name\tOSS Version\tLicense\tNeed '
                  'Check\tComment\ttlsh\tchecksum']
@@ -60,6 +62,6 @@ def write_result_to_txt_and_excel(out_excel_file, final_bin_info, out_txt_file):
                 sys.exit(1)
 
         success, error_msg = write_txt_file(out_txt_file, '\n'.join(final_str))
-        write_result_to_excel(out_excel_file, excel_list)
+        write_result_to_excel(out_excel_file, excel_list, cover)
     else:
         logger.warning("Nothing is detected from the scanner so output file is not generated.")
