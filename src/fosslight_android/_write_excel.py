@@ -5,7 +5,6 @@
 import sys
 import xlsxwriter
 import logging
-from fosslight_util.write_txt import write_txt_file
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.write_excel import hide_column, write_cover_sheet
 
@@ -47,21 +46,17 @@ def create_worksheet(workbook, sheet_name, header_row):
     return worksheet
 
 
-def write_result_to_txt_and_excel(out_excel_file, final_bin_info, out_txt_file, cover=''):
+def write_result(out_excel_file, final_bin_info, cover=''):
     excel_list = []
-    final_str = ['Binary Name\tSource Code Path\tNOTICE.html\tOSS Name\tOSS Version\tLicense\tNeed '
-                 'Check\tComment\ttlsh\tchecksum']
+
     if final_bin_info:
         for item in sorted(final_bin_info, key=lambda binary: (binary.source_code_path, binary.bin_name)):
             try:
                 print_row, print_excel = item.get_print_items()
-                final_str.append('\n'.join(print_row))
                 excel_list.extend(print_excel)
             except Exception as error:
                 logger.error(f"Get results to print:{error}")
                 sys.exit(1)
-
-        success, error_msg = write_txt_file(out_txt_file, '\n'.join(final_str))
         write_result_to_excel(out_excel_file, excel_list, cover)
     else:
         logger.warning("Nothing is detected from the scanner so output file is not generated.")
