@@ -23,7 +23,7 @@ import parmap
 import numpy as np
 from functools import partial
 from fosslight_util.set_log import init_log
-from ._write_excel import write_result_to_txt_and_excel
+from ._write_excel import write_result
 from ._util import (
     read_file,
     write_txt_file,
@@ -769,7 +769,6 @@ def main():
 
     python_script_dir = os.getcwd()
     now = datetime.now().strftime('%y%m%d_%H%M')
-    result_txt_file = os.path.join(python_script_dir, f"fosslight_binary_android_{now}.txt")
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
     result_excel_file = os.path.join(python_script_dir, f"fosslight_report_android_{now}.xlsx")
     remove_list_file = ""
@@ -856,9 +855,8 @@ def main():
         from ._src_analysis import find_item_to_analyze
         final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
 
-    write_result_to_txt_and_excel(result_excel_file, final_bin_info, result_txt_file)
+    write_result(result_excel_file, final_bin_info)
     result_log["Output FOSSLight Report"] = result_excel_file
-    result_log["Output result text file"] = result_txt_file
 
     if _create_additial_notice:
         create_additional_notice(final_bin_info, python_script_dir)
