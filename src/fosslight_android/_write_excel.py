@@ -13,7 +13,7 @@ HIDDEN_HEADER = ['TLSH', 'SHA1']
 
 
 def write_result_to_excel(out_file_name, row_list, cover=''):
-    header_row = ['ID', 'Binary Name', 'Source Code Path', 'NOTICE.html', 'OSS Name', 'OSS Version', 'License',
+    header_row = ['ID', 'Binary Name', 'Source Code Path', 'Notice', 'OSS Name', 'OSS Version', 'License',
                   'Download Location', 'Homepage',
                   'Copyright Text',
                   'License Text', 'Exclude', 'Comment', 'Need Check', 'TLSH', 'SHA1']
