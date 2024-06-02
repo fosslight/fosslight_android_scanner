@@ -769,6 +769,7 @@ def main():
         num_cores = 1
 
     python_script_dir = os.getcwd()
+    android_src_path = python_script_dir
     now = datetime.now().strftime('%y%m%d_%H%M')
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
     result_excel_file = os.path.join(python_script_dir, f"fosslight_report_android_{now}.xlsx")
@@ -798,6 +799,7 @@ def main():
         print_version(PKG_NAME)
     if args.source:  # android source path
         os.chdir(args.source)
+        android_src_path = args.source
     if args.binary:  # Base model's binary.txt to exclude
         base_binary_txt = args.binary
     if args.notice:
@@ -858,7 +860,7 @@ def main():
 
     cover = CoverItem(tool_name=PKG_NAME,
                       start_time=now,
-                      input_path=python_script_dir)
+                      input_path=android_src_path)
     cover.comment = f"Total number of binaries: {len(final_bin_info)}"
     write_result(result_excel_file, final_bin_info, cover)
     result_log["Output FOSSLight Report"] = result_excel_file
