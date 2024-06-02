@@ -54,6 +54,7 @@ from fosslight_util.constant import LOGGER_NAME
 from fosslight_binary.binary_analysis import return_bin_only
 import argparse
 from pathlib import Path
+from fosslight_util.cover import CoverItem
 
 EXCEPTIONAL_PATH = [r"(/)+gen/META/lic_intermediates/"]
 android_log_lines = []
@@ -856,7 +857,11 @@ def main():
         from ._src_analysis import find_item_to_analyze
         final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
 
-    write_result_to_txt_and_excel(result_excel_file, final_bin_info, result_txt_file)
+    cover = CoverItem(tool_name=PKG_NAME,
+                      start_time=now,
+                      input_path=python_script_dir)
+    cover.comment = f"Total number of binaries: {len(final_bin_info)}"
+    write_result_to_txt_and_excel(result_excel_file, final_bin_info, result_txt_file, cover)
     result_log["Output FOSSLight Report"] = result_excel_file
     result_log["Output result text file"] = result_txt_file
 
