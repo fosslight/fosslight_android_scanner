@@ -860,6 +860,7 @@ def main():
     cover = CoverItem(tool_name=PKG_NAME,
                       start_time=now,
                       input_path=python_script_dir)
+    cover.comment = f"Total number of binaries: {len(final_bin_info)}"
     write_result_to_txt_and_excel(result_excel_file, final_bin_info, result_txt_file, cover)
     result_log["Output FOSSLight Report"] = result_excel_file
     result_log["Output result text file"] = result_txt_file
