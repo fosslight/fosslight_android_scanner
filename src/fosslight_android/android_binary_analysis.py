@@ -327,6 +327,7 @@ def get_result_of_notice_html(found_on_html, notice_file_found):
 
 def find_notice_value():
     global notice_file_list, final_bin_info
+    str_notice_files = ""
 
     try:
         notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
@@ -334,7 +335,8 @@ def find_notice_value():
             logger.info(f"Notice file is empty:{notice_files}")
             return
         if notice_files:
-            logger.info(f"Notice files:{notice_files}")
+            str_notice_files = ",".join(notice_files)
+            logger.info(f"Notice files:{str_notice_files}")
         else:
             logger.debug("Can't find a notiece file")
         return_list = do_multi_process(find_notice_html, final_bin_info)
@@ -342,6 +344,7 @@ def find_notice_value():
 
     except IOError as error:  # 'CANNOT_FIND_NOTICE_HTML'
         logger.debug(f"find_notice_value:{error}")
+    return str_notice_files
 
 
 def find_notice_html(bin_info, return_list):
@@ -844,7 +847,7 @@ def main():
 
     map_binary_module_name_and_path(find_binaries_from_out_dir())
 
-    find_notice_value()
+    notice_files = find_notice_value()
     find_bin_license_info()
 
     set_mk_file_path()  # Mk file path and local path, location of NOTICE file, can be different
@@ -862,6 +865,7 @@ def main():
                       start_time=now,
                       input_path=android_src_path)
     cover.comment = f"Total number of binaries: {len(final_bin_info)}"
+    cover.comment += f"\nNotice: {notice_files}"
     write_result(result_excel_file, final_bin_info, cover)
     result_log["Output FOSSLight Report"] = result_excel_file
 
