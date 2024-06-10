@@ -1,5 +1,19 @@
 # Changelog
 
+## v4.1.19 (10/06/2024)
+## Changes
+## 🚀 Features
+
+- Add scanner info sheet @dd-jy (#12)
+
+## 🔧 Maintenance
+
+- Update the column name @soimkim (#16)
+- Update the information on the cover sheet @soimkim (#15)
+- Do not print text file @soimkim (#14)
+
+---
+
 ## v4.1.18 (21/05/2024)
 ## Changes
 ## 🚀 Features
