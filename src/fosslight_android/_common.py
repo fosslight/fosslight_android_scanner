@@ -11,9 +11,6 @@ CONST_NULL = ""
 CONST_TLSH_NULL = "0"
 MODULE_INFO_FILE_NAME = "module-info.json"
 MODULE_TYPE_NAME = "MODULE_NAME"
-MODULE_TYPE_OUTPUT = "MODULE_OUTPUT"
-MODULE_TYPE_INSTALLED = "installed"
-NEED_CHECK_WORD = "(NEED_CHECK)"
 skip_license = ['Other Proprietary License', 'LGE License', 'LGE Proprietary License']
 NOTICE_FILE_NAME = "NOTICE"
 
@@ -59,9 +56,6 @@ class AndroidBinary:
         self.homepage = ""
         self.additional_oss_items = []
         self.is_new_bin = True
-
-    def __del__(self):
-        pass
 
     def set_bin_name(self, value):
         self.bin_name = value
