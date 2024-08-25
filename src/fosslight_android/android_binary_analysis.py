@@ -89,7 +89,7 @@ meta_lic_files = {}
 def do_multi_process(func, input_list):
     manager = multiprocessing.Manager()
     return_list = manager.list()
-    splited_data = np.array_split(input_list, num_cores)
+    splited_data = np.array_split(input_list, num_cores) #sus
     splited_data = [x.tolist() for x in splited_data]
 
     parmap.map(func, splited_data, return_list, pm_pbar=True,
@@ -763,7 +763,6 @@ def main():
     notice_check_ok = False
     base_binary_txt = ""
     auto_fill_oss_name = True
-    _NOTICE_CHECKLIST_TYPE = False
     analyze_source = False
     path_to_exclude = []
 
