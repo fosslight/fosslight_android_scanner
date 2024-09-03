@@ -11,9 +11,6 @@ CONST_NULL = ""
 CONST_TLSH_NULL = "0"
 MODULE_INFO_FILE_NAME = "module-info.json"
 MODULE_TYPE_NAME = "MODULE_NAME"
-MODULE_TYPE_OUTPUT = "MODULE_OUTPUT"
-MODULE_TYPE_INSTALLED = "installed"
-NEED_CHECK_WORD = "(NEED_CHECK)"
 skip_license = ['Other Proprietary License', 'LGE License', 'LGE Proprietary License']
 NOTICE_FILE_NAME = "NOTICE"
 
@@ -60,9 +57,6 @@ class AndroidBinary:
         self.additional_oss_items = []
         self.is_new_bin = True
 
-    def __del__(self):
-        pass
-
     def set_bin_name(self, value):
         self.bin_name = value
 
@@ -77,12 +71,6 @@ class AndroidBinary:
 
     def set_module_name(self, value):
         self.module_name = value
-
-    def set_exclude(self, value):
-        if value:
-            self.exclude = "Exclude"
-        else:
-            self.exclude = ""
 
     def set_notice(self, value):
         self.notice = value
@@ -108,15 +96,6 @@ class AndroidBinary:
 
     def set_oss_version(self, value):
         self.oss_version = value
-
-    def set_url(self, value):
-        self.url = value
-
-    def set_homepage(self, value):
-        self.homepage = value
-
-    def set_download_location(self, value):
-        self.download_location = value
 
     def get_print_items(self):
         print_items_txt = []
@@ -186,25 +165,3 @@ def get_comment(default_comment, license_to_notice, notice_value, empty_columns)
     comment = default_comment + comment  # Paste Auto ID comment in front.
 
     return comment
-
-
-def set_value_switch(bin, key, value):
-    switcher = {
-        'BinaryName': bin.set_bin_name,
-        'SourceCodePath': bin.set_source_code_path,
-        'ModuleName': bin.set_module_name,
-        'NOTICE': bin.set_notice,
-        'License': bin.set_license,
-        'mkFilePath': bin.mk_file_path,
-        'tlsh': bin.set_tlsh,
-        'checksum': bin.set_checksum,
-        'OSSName': bin.set_oss_name,
-        'OSSVersion': bin.set_oss_version,
-        'Comment': bin.set_comment
-    }
-    func = switcher.get(key, lambda key: invalid(key))
-    func(value)
-
-
-def invalid(cmd):
-    print('[{}] is invalid'.format(cmd))
