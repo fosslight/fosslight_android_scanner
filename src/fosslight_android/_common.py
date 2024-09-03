@@ -97,7 +97,7 @@ class AndroidBinary:
     def set_oss_version(self, value):
         self.oss_version = value
 
-    def get_print_items(self):
+    def get_print_array(self, return_excel=True):
         print_items_txt = []
         print_items_excel = []
         oss_name = self.oss_name
@@ -125,7 +125,10 @@ class AndroidBinary:
                 excel_item.extend(item.split('\t'))
                 excel_item.extend(['', '', '', '', '', comment, need_check, self.tlsh, self.checksum])
                 print_items_excel.append(excel_item)
-        return print_items_txt, print_items_excel
+        if return_excel:
+            return print_items_excel
+        else:
+            return print_items_txt
 
 
 def check_empty_column(license, oss_name, directory):
