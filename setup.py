@@ -17,7 +17,7 @@ with open('requirements.txt', 'r', 'utf-8') as f:
 if __name__ == "__main__":
     setup(
         name='fosslight_android',
-        version='4.1.19',
+        version='5.0.0',
         package_dir={"": "src"},
         packages=find_packages(where='src'),
         description='FOSSLight Android Scanner',
