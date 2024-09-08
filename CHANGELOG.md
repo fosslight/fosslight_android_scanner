@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.0.0 (08/09/2024)
+## Changes
+## 🔧 Maintenance
+
+- Refactoring related to FOSSLight Util @soimkim (#21)
+- Revert android_binary_analysis @soimkim (#20)
+- Remove the Unused Option from Run Parameters @cjho0316 (#18)
+- Limit version of fosslight packages @soimkim (#19)
+
+---
+
 ## v4.1.19 (10/06/2024)
 ## Changes
 ## 🚀 Features
