@@ -23,7 +23,6 @@ import parmap
 import numpy as np
 from functools import partial
 from fosslight_util.set_log import init_log
-from ._write_excel import write_result
 from ._util import (
     read_file,
     write_txt_file,
@@ -54,7 +53,8 @@ from fosslight_util.constant import LOGGER_NAME
 from fosslight_binary.binary_analysis import return_bin_only
 import argparse
 from pathlib import Path
-from fosslight_util.cover import CoverItem
+from fosslight_util.oss_item import ScannerItem
+from fosslight_util.output_format import write_output_file
 
 EXCEPTIONAL_PATH = [r"(/)+gen/META/lic_intermediates/"]
 android_log_lines = []
@@ -74,6 +74,11 @@ NOTICE_HTML_FILE_NAME = ""
 ANDROID_LOG_FILE_NAME = "android.log"
 num_cores = 1
 now = ""
+HIDDEN_HEADER = {'TLSH', "SHA1"}
+HEADER = {'BIN (Android)': ['ID', 'Binary Path', 'Source Path', 'Notice', 'OSS Name',
+                            'OSS Version', 'License', 'Download Location', 'Homepage',
+                            'Copyright Text', 'License Text', 'Exclude', 'Comment',
+                            'Need Check', 'TLSH', 'SHA1']}
 
 # For checking repository's name
 repositories = {}
@@ -635,7 +640,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
                         continue
         if skip:
             cnt += 1
-            print_removed_str, print_removed_array = item.get_print_items()
+            print_removed_str = item.get_print_array(False)
             for row_removed in print_removed_str:
                 str_bin_removed += f"{row_removed}\n"
             continue
@@ -679,7 +684,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
 
                 for bin_same_name in same_name_binaries:
                     if bin_same_name.bin_name != final_added.bin_name:
-                        print_removed_str, print_removed_array = bin_same_name.get_print_items()
+                        print_removed_str = bin_same_name.get_print_array(False)
                         for row_removed in print_removed_str:
                             str_bin_removed += f"{row_removed}\n"
             else:  # Don't have any duplicated binaries
@@ -766,6 +771,7 @@ def main():
     _NOTICE_CHECKLIST_TYPE = False
     analyze_source = False
     path_to_exclude = []
+    RESULT_FILE_EXTENSION = ".xlsx"
 
     num_cores = multiprocessing.cpu_count() - 1
     if num_cores < 1:
@@ -775,7 +781,7 @@ def main():
     android_src_path = python_script_dir
     now = datetime.now().strftime('%y%m%d_%H%M')
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
-    result_excel_file = os.path.join(python_script_dir, f"fosslight_report_android_{now}.xlsx")
+    result_excel_file_name = os.path.join(python_script_dir, f"fosslight_report_android_{now}")
     remove_list_file = ""
 
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
@@ -861,13 +867,17 @@ def main():
         from ._src_analysis import find_item_to_analyze
         final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
 
-    cover = CoverItem(tool_name=PKG_NAME,
-                      start_time=now,
-                      input_path=android_src_path)
-    cover.comment = f"Total number of binaries: {len(final_bin_info)}"
-    cover.comment += f"\nNotice: {notice_files}"
-    write_result(result_excel_file, final_bin_info, cover)
-    result_log["Output FOSSLight Report"] = result_excel_file
+    scan_item = ScannerItem(PKG_NAME, now)
+    scan_item.set_cover_pathinfo(android_src_path, "")
+
+    scan_item.set_cover_comment(f"Total number of binaries: {len(final_bin_info)}")
+    scan_item.set_cover_comment(f"\nNotice: {notice_files}")
+    scan_item.append_file_items(final_bin_info, PKG_NAME)
+    success, msg, result_file = write_output_file(result_excel_file_name, RESULT_FILE_EXTENSION,
+                                                  scan_item, HEADER, HIDDEN_HEADER)
+    if not success:
+        logger.warning(f"Failed to write result to excel:{msg}")
+    result_log["Output FOSSLight Report"] = f"{result_file}"
 
     if _create_additial_notice:
         create_additional_notice(final_bin_info, python_script_dir)
