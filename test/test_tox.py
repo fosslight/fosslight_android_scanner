@@ -17,7 +17,7 @@ def test_fosslight_android(run_command, android_src_path, android_build_log):
 
     # when
     command = f"fosslight_android -s {android_src_path} -a {android_build_log} -m"
-    success, stdout, stderr = run_command(command)
+    success, stderr = run_command(command)
 
 
     # then
