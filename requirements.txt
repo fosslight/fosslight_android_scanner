@@ -16,3 +16,4 @@ tqdm
 urlopen
 XlsxWriter
 PyYAML
+pytest
