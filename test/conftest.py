@@ -25,4 +25,5 @@ def run_command():
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         success = result.returncode == 0
         return success, result.stdout.decode('utf-8'), result.stderr.decode('utf-8')
-    return _run_command
+    
+    
