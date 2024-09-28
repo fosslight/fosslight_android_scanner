@@ -5,6 +5,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import pytest
+
+import os
 
 
 def test_fosslight_android(run_command, android_src_path, android_build_log):
@@ -15,10 +18,10 @@ def test_fosslight_android(run_command, android_src_path, android_build_log):
 
     # when
     command = f"fosslight_android -s {android_src_path} -a {android_build_log} -m"
-    success, _, _ = run_command(command)
+    success, _, stderr = run_command(command)
 
     # then
-    assert success is True, f"fosslight_android test_run failed"
+    assert success is True, f"fosslight_android test_run failed. stderr: {stderr}"
 
 
 def test_release_environment(run_command):
