@@ -6,8 +6,10 @@
 
 
 import os
+import pytest
 
 
+@pytest.mark.skipif(os.getenv("CI") == "true", reason="CI Envirionment.")
 def test_fosslight_android(run_command, android_src_path, android_build_log):
 
     # given
