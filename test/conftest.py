@@ -8,13 +8,16 @@ import os
 import subprocess
 import pytest
 
+
 @pytest.fixture
 def android_src_path():
     return os.getenv("ANDROID_SRC_PATH")
 
+
 @pytest.fixture
 def android_build_log():
     return os.getenv("ANDROID_BUILD_LOG")
+
 
 @pytest.fixture
 def run_command():
