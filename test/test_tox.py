@@ -4,8 +4,6 @@
 # SPDX-FileCopyrightText: Copyright 2023 LG Electronics Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import os
-import pytest
 
 import os
 
@@ -18,7 +16,7 @@ def test_fosslight_android(run_command, android_src_path, android_build_log):
 
     # when
     command = f"fosslight_android -s {android_src_path} -a {android_build_log} -m"
-    success, _, stderr = run_command(command)
+    success, stdout, stderr = run_command(command)
 
     # then
     assert success is True, f"fosslight_android test_run failed. stderr: {stderr}"
@@ -27,13 +25,13 @@ def test_fosslight_android(run_command, android_src_path, android_build_log):
 def test_release_environment(run_command):
 
     # given
-    run_command("rm -rf test_result")
+    test_result, _, _ = run_command("rm -rf test_result")
     os.makedirs("test_result", exist_ok=True)
 
     # when
-    help_result, _, _  = run_command("fosslight_android -h")
+    help_result, _, _ = run_command("fosslight_android -h")
     ok_result, _, _ = run_command("fosslight_android -b test/binary.txt -n test/NOTICE.html -c ok")
-    nok_result, _, _  = run_command("fosslight_android -b test/binary.txt -n test/NOTICE.html -c nok")
+    nok_result, _, _ = run_command("fosslight_android -b test/binary.txt -n test/NOTICE.html -c nok")
     divide_result, _, _ = run_command("fosslight_android -d test/needtoadd-notice.html")
 
     # then
