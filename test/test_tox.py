@@ -9,7 +9,7 @@ import os
 import pytest
 
 
-@pytest.mark.skipif(os.getenv("CI") == "true", reason="CI Envirionment.")
+@pytest.mark.run
 def test_fosslight_android(run_command, android_src_path, android_build_log):
 
     # given
@@ -24,6 +24,7 @@ def test_fosslight_android(run_command, android_src_path, android_build_log):
     assert success is True, f"fosslight_android test_run failed. stderr: {stderr}"
 
 
+@pytest.mark.release
 def test_release_environment(run_command):
 
     # given
