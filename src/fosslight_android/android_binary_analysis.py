@@ -320,12 +320,23 @@ def find_tag_file(bin_info_list, return_bin_list):
         dir_path = item.source_code_path
         item.license = CONST_NULL
         try:
-            module_license_files = [x for x in os.listdir(dir_path) if x.startswith('MODULE_LICENSE_')]
-            if module_license_files is not None and len(module_license_files) > 0:
-                for module_license_file in module_license_files:
-                    item.license = module_license_file.replace('MODULE_LICENSE_', '')
-                    if item.license in _TAG_FILE_TABLE:
-                        item.license = _TAG_FILE_TABLE[item.license]
+            module_license_files = [
+                _TAG_FILE_TABLE.get(x.replace('MODULE_LICENSE_', ''), x.replace('MODULE_LICENSE_', ''))
+                for x in os.listdir(dir_path) if x.startswith('MODULE_LICENSE_')
+            ]
+            # 파일 추가와 'MODULE_LICENSE_' 대체를 한 번에 처리
+
+            # module_license_files = [x for x in os.listdir(dir_path) if x.startswith('MODULE_LICENSE_')]
+            # if module_license_files is not None and len(module_license_files) > 0:
+                # for module_license_file in module_license_files:
+                    # item.license = module_license_file.replace('MODULE_LICENSE_', '')
+                    # if item.license in _TAG_FILE_TABLE:
+                    #     item.license = _TAG_FILE_TABLE[item.license]
+
+            if module_license_files:
+                item.license = module_license_files[0]
+            # 만약 빈값이 아니라면, 라이센스 업데이트
+
         except Exception:
             item.license = CONST_NULL
         if item.license == CONST_NULL:
