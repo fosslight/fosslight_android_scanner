@@ -34,14 +34,14 @@ def check_packaging_files(root_path):
     check_pkg_files_recursively(root_path)
 
     # Print result
-    logger.warn("1. Prohibited file names :" + str(len(prohibited_file_names)))
-    logger.warn('\n'.join(map(str, prohibited_file_names)))
-    logger.warn("2. Prohibited file extension :" + str(len(prohibited_file_extensions)))
-    logger.warn('\n'.join(map(str, prohibited_file_extensions)))
-    logger.warn("3. Prohibited Path :" + str(len(prohibited_path_list)))
-    logger.warn('\n'.join(map(str, prohibited_path_list)))
-    logger.warn("4. Fail to read :" + str(len(failed_to_read_path)))
-    logger.warn('\n'.join(map(str, failed_to_read_path)))
+    logger.warning("1. Prohibited file names :" + str(len(prohibited_file_names)))
+    logger.warning('\n'.join(map(str, prohibited_file_names)))
+    logger.warning("2. Prohibited file extension :" + str(len(prohibited_file_extensions)))
+    logger.warning('\n'.join(map(str, prohibited_file_extensions)))
+    logger.warning("3. Prohibited Path :" + str(len(prohibited_path_list)))
+    logger.warning('\n'.join(map(str, prohibited_path_list)))
+    logger.warning("4. Fail to read :" + str(len(failed_to_read_path)))
+    logger.warning('\n'.join(map(str, failed_to_read_path)))
 
 
 def read_packaging_config():

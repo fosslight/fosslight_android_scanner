@@ -176,9 +176,9 @@ def read_module_info_from_build_output_file():
     # Only in case upper 7.0.0 versions have a module-info.mk at build/core/tasks.
     # Lower versions sould copy module-info.mk to build/core/tasks than build it again.
     if not os.path.isfile(os.path.join(build_out_path, MODULE_INFO_FILE_NAME)):
-        logger.warn("BUILD OUTPUT PATH :", build_out_path)
-        logger.warn("Can't find a module-info.json file at build output path.")
-        logger.warn("Please copy module-info.mk file to build/core/tasks than build it again.")
+        logger.warning("BUILD OUTPUT PATH :", build_out_path)
+        logger.warning("Can't find a module-info.json file at build output path.")
+        logger.warning("Please copy module-info.mk file to build/core/tasks than build it again.")
         sys.exit(1)
 
     try:
@@ -188,7 +188,7 @@ def read_module_info_from_build_output_file():
         f.close()
 
     except IOError:
-        logger.warn("[ERROR] Cannot read ", MODULE_INFO_FILE_NAME)
+        logger.warning("[ERROR] Cannot read ", MODULE_INFO_FILE_NAME)
 
 
 def set_env_variables_from_result_log():
@@ -755,7 +755,7 @@ def find_meta_lic_files():
                                     if matched:
                                         lic_list.append(matched)
                         except Exception as error:
-                            logger.warn(f"meta_lic_files:{error}")
+                            logger.warning(f"meta_lic_files:{error}")
                     if lic_list:
                         lic = ','.join(lic_list)
                         meta_lic_files[key] = lic
