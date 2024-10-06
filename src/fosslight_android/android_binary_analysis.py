@@ -685,7 +685,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
 
                     if bin_with_path.startswith('system/'):
                         priority[0] = return_shorter_installed_path_data(priority[0], bin_same_name)
-                    if src_path is not None and len(src_path) > 0:
+                    if src_path:
                         priority[1] = return_shorter_installed_path_data(priority[1], bin_same_name)
                     if notice_check == "ok(NA)" or notice_check == "ok":
                         value_notice = notice_check

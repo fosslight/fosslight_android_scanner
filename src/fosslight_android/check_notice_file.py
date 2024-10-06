@@ -33,10 +33,10 @@ def run_notice_html_checklist(binary_file, check_type, notice_file):
                     if output != "":
                         if find_bin_in_notice(output, notice_file_list):  # ok
                             if not check_type:
-                                logger.warn(f"{output} ok")
+                                logger.warning(f"{output} ok")
                         else:  # nok
                             if check_type:
-                                logger.warn(f"{output} nok")
+                                logger.warning(f"{output} nok")
                 except Exception as error:
                     logger.info(f"Find bin in NOTICE :{error}")
         except IOError:
@@ -286,16 +286,16 @@ def divide_notice_files_by_binary(notice_file_to_divide, result_file_path, now):
             if not os.path.exists(dir_name):
                 os.makedirs(dir_name)
             else:
-                logger.warn(dir_name + " folder already exists.")
+                logger.warning(dir_name + " folder already exists.")
         except OSError:
-            logger.warn("Cannot create " + dir_name + " folder.")
+            logger.warning("Cannot create " + dir_name + " folder.")
             return
         os.chdir(dir_name)
         items = parsing_notice_html_for_license_text(contents)
         create_license_txt_files(items, "")
-        logger.warn(dir_name + " folder has been created.")
+        logger.warning(dir_name + " folder has been created.")
     else:
-        logger.warn("Failed to read :" + notice_file_to_divide)
+        logger.warning("Failed to read :" + notice_file_to_divide)
 
 
 def create_license_txt_files(file_list, result_file_path):
@@ -308,7 +308,7 @@ def create_license_txt_files(file_list, result_file_path):
                 os.makedirs(dir)
             write_txt_file(file_name, file['license_txt'], "")
     except Exception as error:
-        logger.warn(f"Error: Cannot create a notice file.:{error}")
+        logger.warning(f"Error: Cannot create a notice file.:{error}")
 
 
 def parsing_notice_html_for_license_text(notice_file_content):

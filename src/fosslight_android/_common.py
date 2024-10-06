@@ -152,7 +152,7 @@ def check_empty_column(license, oss_name, directory):
 def get_comment(default_comment, license_to_notice, notice_value, empty_columns):
     comment = ""
 
-    if empty_columns is not None and len(empty_columns) > 0:
+    if empty_columns:
         comment = "Fill in " + ",".join(empty_columns) + "."
 
     if notice_value == 'nok' and license_to_notice:
