@@ -154,19 +154,33 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
         js_value[MODULE_TYPE_NAME] = binary_name_only
         return js_value
     else:  # Find binary by installed path
-        for key in module_info_json_obj:
-            js_value = module_info_json_obj[key]
-            output_files = js_value["installed"]
-            if output_files is not None:
-                for output_file in output_files:
-                    if output_file == binary_name_with_path:
-                        js_value[MODULE_TYPE_NAME] = key
-                        return js_value
-                    else:
-                        path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
-                        if path_with_out_dir == output_file:
-                            js_value[MODULE_TYPE_NAME] = key
-                            return js_value
+
+        # for key in module_info_json_obj:
+        #     js_value = module_info_json_obj[key]
+        #     output_files = js_value["installed"]
+        #     if output_files is not None:
+
+        for key, js_value in module_info_json_obj.items():
+            output_files = js_value.get("installed", [])
+            if not output_files:
+                continue
+
+            # for output_file in output_files:
+            #         if output_file == binary_name_with_path:
+            #             js_value[MODULE_TYPE_NAME] = key
+            #             return js_value
+            #         else:
+            #             path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
+            #             if path_with_out_dir == output_file:
+            #                 js_value[MODULE_TYPE_NAME] = key
+            #                 return js_value
+            # 반복문과 중복 코드 제거
+
+            path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
+            if (binary_name_with_path in output_files) or (path_with_out_dir in output_files):
+                js_value[MODULE_TYPE_NAME] = key
+                return js_value
+
     return ""
 
 
@@ -176,9 +190,9 @@ def read_module_info_from_build_output_file():
     # Only in case upper 7.0.0 versions have a module-info.mk at build/core/tasks.
     # Lower versions sould copy module-info.mk to build/core/tasks than build it again.
     if not os.path.isfile(os.path.join(build_out_path, MODULE_INFO_FILE_NAME)):
-        logger.warn("BUILD OUTPUT PATH :", build_out_path)
-        logger.warn("Can't find a module-info.json file at build output path.")
-        logger.warn("Please copy module-info.mk file to build/core/tasks than build it again.")
+        logger.warning("BUILD OUTPUT PATH :", build_out_path)
+        logger.warning("Can't find a module-info.json file at build output path.")
+        logger.warning("Please copy module-info.mk file to build/core/tasks than build it again.")
         sys.exit(1)
 
     try:
@@ -188,7 +202,7 @@ def read_module_info_from_build_output_file():
         f.close()
 
     except IOError:
-        logger.warn("[ERROR] Cannot read ", MODULE_INFO_FILE_NAME)
+        logger.warning("[ERROR] Cannot read ", MODULE_INFO_FILE_NAME)
 
 
 def set_env_variables_from_result_log():
@@ -306,12 +320,23 @@ def find_tag_file(bin_info_list, return_bin_list):
         dir_path = item.source_code_path
         item.license = CONST_NULL
         try:
-            module_license_files = [x for x in os.listdir(dir_path) if x.startswith('MODULE_LICENSE_')]
-            if module_license_files is not None and len(module_license_files) > 0:
-                for module_license_file in module_license_files:
-                    item.license = module_license_file.replace('MODULE_LICENSE_', '')
-                    if item.license in _TAG_FILE_TABLE:
-                        item.license = _TAG_FILE_TABLE[item.license]
+            module_license_files = [
+                _TAG_FILE_TABLE.get(x.replace('MODULE_LICENSE_', ''), x.replace('MODULE_LICENSE_', ''))
+                for x in os.listdir(dir_path) if x.startswith('MODULE_LICENSE_')
+            ]
+            # 파일 추가와 'MODULE_LICENSE_' 대체를 한 번에 처리
+
+            # module_license_files = [x for x in os.listdir(dir_path) if x.startswith('MODULE_LICENSE_')]
+            # if module_license_files is not None and len(module_license_files) > 0:
+                # for module_license_file in module_license_files:
+                    # item.license = module_license_file.replace('MODULE_LICENSE_', '')
+                    # if item.license in _TAG_FILE_TABLE:
+                    #     item.license = _TAG_FILE_TABLE[item.license]
+
+            if module_license_files:
+                item.license = module_license_files[0]
+            # 만약 빈값이 아니라면, 라이센스 업데이트
+
         except Exception:
             item.license = CONST_NULL
         if item.license == CONST_NULL:
@@ -384,11 +409,9 @@ def map_binary_module_name_and_path(installed_file_list):
         bin_info = AndroidBinary(file_name_with_relative_path)
         bin_info.set_bin_name_with_installed_path(out_binary)
         if found_json_obj != "":
-            if found_json_obj["path"] != "" and len(found_json_obj["path"]) > 0:
+            bin_info.set_module_name(found_json_obj[MODULE_TYPE_NAME])
+            if found_json_obj.get("path"):
                 bin_info.set_source_code_path(found_json_obj["path"][0])
-                bin_info.set_module_name(found_json_obj[MODULE_TYPE_NAME])
-            else:
-                bin_info.set_module_name(found_json_obj[MODULE_TYPE_NAME])
         else:
             bin_info.set_module_name(module_name)
 
@@ -662,7 +685,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
 
                     if bin_with_path.startswith('system/'):
                         priority[0] = return_shorter_installed_path_data(priority[0], bin_same_name)
-                    if src_path is not None and len(src_path) > 0:
+                    if src_path:
                         priority[1] = return_shorter_installed_path_data(priority[1], bin_same_name)
                     if notice_check == "ok(NA)" or notice_check == "ok":
                         value_notice = notice_check
@@ -755,7 +778,7 @@ def find_meta_lic_files():
                                     if matched:
                                         lic_list.append(matched)
                         except Exception as error:
-                            logger.warn(f"meta_lic_files:{error}")
+                            logger.warning(f"meta_lic_files:{error}")
                     if lic_list:
                         lic = ','.join(lic_list)
                         meta_lic_files[key] = lic

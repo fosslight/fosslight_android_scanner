@@ -19,7 +19,7 @@ def read_file(file_name_with_path, read_as_one_line=False):
             file = open(file_name_with_path, encoding=encoding_option)
             read_line = file.read() if read_as_one_line else file.readlines()
             file.close()
-            if read_line is not None and len(read_line) > 0:
+            if read_line:
                 read_success = True
                 break
         except Exception:

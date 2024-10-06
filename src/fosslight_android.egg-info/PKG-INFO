@@ -1,0 +1,64 @@
+Metadata-Version: 2.1
+Name: fosslight_android
+Version: 5.0.0
+Summary: FOSSLight Android Scanner
+Home-page: https://github.com/fosslight/fosslight_android_scanner
+Download-URL: https://github.com/fosslight/fosslight_android_scanner
+Author: LG Electronics
+License: Apache-2.0
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fosslight_util~=2.0.0
+Requires-Dist: fosslight_source~=2.0.0
+Requires-Dist: fosslight_binary~=5.0.0
+Requires-Dist: beautifulsoup4
+Requires-Dist: lxml
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: parmap
+Requires-Dist: psycopg2-binary
+Requires-Dist: python-dateutil
+Requires-Dist: py-tlsh
+Requires-Dist: pytz
+Requires-Dist: six
+Requires-Dist: soupsieve
+Requires-Dist: tqdm
+Requires-Dist: urlopen
+Requires-Dist: XlsxWriter
+Requires-Dist: PyYAML
+Requires-Dist: pytest
+
+<!--
+# SPDX-FileCopyrightText: Copyright 2023 LG Electronics Inc.
+# SPDX-License-Identifier: Apache-2.0
+-->
+
+# FOSSLight Android Scanner
+
+**FOSSLight Android Scanner** is a Python package that print all the binaries loaded on the Android-based model to check which open source is used for each binary, and to check whether the notices are included in the OSS notice (ex-NOTICE.html: OSS Notice for Android-based model).
+
+
+## 📖 User Guide
+
+We describe the user guide in the FOSSLight guide page.
+Please see the [**User Guide**](https://fosslight.org/fosslight-guide-en/scanner/6_android.html) for more information on how to install and run it.
+
+
+## 👏 Contributing Guide
+
+We always welcome your contributions.  
+Please see the [CONTRIBUTING guide](https://fosslight.org/fosslight-guide-en/learn/1_contribution.html) for how to contribute.
+
+
+## 📄 License
+
+FOSSLight Android Scanner is Apache-2.0, as found in the [LICENSE][l] file.
+
+[l]: https://github.com/fosslight/fosslight_android/blob/main/LICENSE

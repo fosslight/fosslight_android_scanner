@@ -68,7 +68,7 @@ def get_oss_info_from_db(platform_version, bin_info_list, return_list):
                         else:  # In case more than 2 OSS is used for this bin.
                             item.set_additional_oss_items(row['ossname'] + '\t' + row['ossversion'] + '\t' + row['license'])
             except Exception as error:
-                logger.warn(f"READ OSS :{error}")
+                logger.warning(f"READ OSS :{error}")
 
         disconnect_lge_bin_db(conn, cur)
     return_list.extend(bin_info_list)
@@ -94,7 +94,7 @@ def get_oss_info_by_tlsh_and_filename(file_name, checksum_value, tlsh_value, sou
 
     # Match checksum and fileName
     df_result = get_list_by_using_query(sql_statement + sql_statement_checksum, sql_checksum_params, columns, conn, cur)
-    if df_result is not None and len(df_result) > 0:  # Found a file with the same checksum.
+    if df_result:  # Found a file with the same checksum.
         final_result_item = df_result
     else:  # Can't find files that have same name and checksum
         # Match tlsh and fileName
