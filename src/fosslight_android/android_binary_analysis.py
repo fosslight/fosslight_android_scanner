@@ -409,11 +409,9 @@ def map_binary_module_name_and_path(installed_file_list):
         bin_info = AndroidBinary(file_name_with_relative_path)
         bin_info.set_bin_name_with_installed_path(out_binary)
         if found_json_obj != "":
-            if found_json_obj["path"] != "" and len(found_json_obj["path"]) > 0:
+            bin_info.set_module_name(found_json_obj[MODULE_TYPE_NAME])
+            if found_json_obj.get("path"):
                 bin_info.set_source_code_path(found_json_obj["path"][0])
-                bin_info.set_module_name(found_json_obj[MODULE_TYPE_NAME])
-            else:
-                bin_info.set_module_name(found_json_obj[MODULE_TYPE_NAME])
         else:
             bin_info.set_module_name(module_name)
 
