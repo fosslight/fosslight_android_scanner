@@ -154,19 +154,33 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
         js_value[MODULE_TYPE_NAME] = binary_name_only
         return js_value
     else:  # Find binary by installed path
-        for key in module_info_json_obj:
-            js_value = module_info_json_obj[key]
-            output_files = js_value["installed"]
-            if output_files is not None:
-                for output_file in output_files:
-                    if output_file == binary_name_with_path:
-                        js_value[MODULE_TYPE_NAME] = key
-                        return js_value
-                    else:
-                        path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
-                        if path_with_out_dir == output_file:
-                            js_value[MODULE_TYPE_NAME] = key
-                            return js_value
+
+        # for key in module_info_json_obj:
+        #     js_value = module_info_json_obj[key]
+        #     output_files = js_value["installed"]
+        #     if output_files is not None:
+
+        for key, js_value in module_info_json_obj.items():
+            output_files = js_value.get("installed", [])
+            if not output_files:
+                continue
+
+            # for output_file in output_files:
+            #         if output_file == binary_name_with_path:
+            #             js_value[MODULE_TYPE_NAME] = key
+            #             return js_value
+            #         else:
+            #             path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
+            #             if path_with_out_dir == output_file:
+            #                 js_value[MODULE_TYPE_NAME] = key
+            #                 return js_value
+            # 반복문과 중복 코드 제거
+
+            path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
+            if (binary_name_with_path in output_files) or (path_with_out_dir in output_files):
+                js_value[MODULE_TYPE_NAME] = key
+                return js_value
+
     return ""
 
 
