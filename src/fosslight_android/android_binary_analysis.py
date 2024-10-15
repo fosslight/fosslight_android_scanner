@@ -846,7 +846,7 @@ def main():
 
     read_success, android_log_lines = read_file(ANDROID_LOG_FILE_NAME)
     if not read_success:
-        logger.error("Fail to read a file:" + ANDROID_LOG_FILE_NAME)
+        logger.error("(-a option) Fail to read a file:" + ANDROID_LOG_FILE_NAME)
         sys.exit(1)
     else:
         set_env_variables_from_result_log()

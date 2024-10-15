@@ -54,7 +54,7 @@ def find_item_to_analyze(bin_info, output_path, start_time="", path_to_exclude=[
                 if source_path == analyzed_path and item_license == CONST_NULL:
                     item.set_license(analyzed_license)
         except Exception as error:
-            logger.debug(f"failed to update license from src analysis:{error}")
+            logger.debug(f"Failed to update license from src analysis:{error}")
 
     return bin_info
 
