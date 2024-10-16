@@ -42,7 +42,7 @@ def run_notice_html_checklist(binary_file, check_type, notice_file):
         except IOError:
             logger.info(CANNOT_FIND_MSG)
     else:
-        logger.info("Fail to read a binary file:" + binary_file)
+        logger.info(f"Fail to read a binary file: {binary_file}")
     return notice_file_list
 
 
@@ -280,22 +280,22 @@ def get_binary_notice_text(binary_file_array, notice_file_path):
 def divide_notice_files_by_binary(notice_file_to_divide, result_file_path, now):
     read_success, contents = read_file(notice_file_to_divide, True)
     if read_success:
-        dir_name = "NOTICE_FILES_" + now
+        dir_name = f"NOTICE_FILES_{now}"
         dir_name = os.path.join(result_file_path, dir_name)
         try:
             if not os.path.exists(dir_name):
                 os.makedirs(dir_name)
             else:
-                logger.warn(dir_name + " folder already exists.")
+                logger.warn(f"{dir_name} folder already exists.")
         except OSError:
-            logger.warn("Cannot create " + dir_name + " folder.")
+            logger.warn(f"Cannot create {dir_name} folder.")
             return
         os.chdir(dir_name)
         items = parsing_notice_html_for_license_text(contents)
         create_license_txt_files(items, "")
-        logger.warn(dir_name + " folder has been created.")
+        logger.warn(f"{dir_name} folder has been created.")
     else:
-        logger.warn("Failed to read :" + notice_file_to_divide)
+        logger.warn(f"Failed to read: {notice_file_to_divide}")
 
 
 def create_license_txt_files(file_list, result_file_path):
