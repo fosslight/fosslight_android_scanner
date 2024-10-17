@@ -289,8 +289,6 @@ def divide_notice_files_by_binary(notice_file_to_divide, result_file_path, now):
                 logger.warning(f"{dir_name} folder already exists.")
         except OSError:
             logger.warning(f"Cannot create {dir_name} folder.")
-        except OSError:
-            logger.warning("Cannot create " + dir_name + " folder.")
             return
         os.chdir(dir_name)
         items = parsing_notice_html_for_license_text(contents)
