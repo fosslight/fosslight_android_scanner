@@ -286,16 +286,18 @@ def divide_notice_files_by_binary(notice_file_to_divide, result_file_path, now):
             if not os.path.exists(dir_name):
                 os.makedirs(dir_name)
             else:
-                logger.warning(dir_name + " folder already exists.")
+                logger.warning(f"{dir_name} folder already exists.")
+        except OSError:
+            logger.warning(f"Cannot create {dir_name} folder.")
         except OSError:
             logger.warning("Cannot create " + dir_name + " folder.")
             return
         os.chdir(dir_name)
         items = parsing_notice_html_for_license_text(contents)
         create_license_txt_files(items, "")
-        logger.warning(dir_name + " folder has been created.")
+        logger.warning(f"{dir_name} folder has been created.")
     else:
-        logger.warning("Failed to read :" + notice_file_to_divide)
+        logger.warning(f"Failed to read: {notice_file_to_divide}")
 
 
 def create_license_txt_files(file_list, result_file_path):
