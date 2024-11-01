@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.0.1 (01/11/2024)
+## Changes
+## 🔧 Maintenance
+
+- Update requirements.txt @dd-jy (#28)
+- Print option name with error msg @bjk7119 (#27)
+- Refactor existing tox test to pytest @ena-isme (#24)
+
+---
+
 ## v5.0.0 (08/09/2024)
 ## Changes
 ## 🔧 Maintenance
