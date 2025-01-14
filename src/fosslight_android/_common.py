@@ -18,6 +18,7 @@ NOTICE_FILE_NAME = "NOTICE"
 class AndroidBinary:
     bin_name = ""
     bin_name_with_installed_path = ""
+    bin_name_with_path = ""
     binary_name_without_path = ""
     source_code_path = ""
     module_name = ""
@@ -38,6 +39,7 @@ class AndroidBinary:
 
     def __init__(self, value):
         self.bin_name = value
+        self.bin_name_with_path = value  # Needed for FL Binary Scanner
         self.binary_name_without_path = ""
         self.bin_name_with_installed_path = ""
         self.source_code_path = CONST_NULL

@@ -270,7 +270,7 @@ def find_binaries_from_out_dir():
     tmp_files = []
     for file_rel_path in return_list:
         if any(re.search(re_except_path, file_rel_path) for re_except_path in EXCEPTIONAL_PATH):
-            logger.debug(f"REMOVE (Exceptional Path):{file_rel_path}")
+            #logger.debug(f"REMOVE (Exceptional Path):{file_rel_path}")
             continue
         else:
             bin_item = AndroidBinary(os.path.abspath(file_rel_path))
@@ -437,8 +437,7 @@ def search_binaries_by_bin_name_and_checksum(bin_name_to_search, bin_checksum_to
     result = False
     bin_name_without_path = os.path.basename(bin_name_to_search)
     for item in final_bin_info:
-        bin_name_with_path = item.bin_name
-        bin_name = os.path.basename(bin_name_with_path)
+        bin_name = os.path.basename(item.bin_name)
         checksum = item.checksum
         if bin_name == bin_name_without_path and checksum == bin_checksum_to_search:
             bin_list_same_names.append(item)
@@ -623,8 +622,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
     remove_list, remove_tlsh_list = remove_from_the_list(remove_list_file)
 
     for item in final_bin_info[:]:
-        bin_name_with_path = item.bin_name
-        bin_name_to_search = os.path.basename(bin_name_with_path)
+        bin_name_to_search = os.path.basename(item.bin_name)
         bin_checksum = item.checksum
         search_key = bin_checksum + bin_name_to_search
 
@@ -645,7 +643,7 @@ def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
                 str_bin_removed += f"{row_removed}\n"
             continue
         elif search_key not in checked_file_name:
-            find_result, same_name_binaries = search_binaries_by_bin_name_and_checksum(bin_name_with_path,
+            find_result, same_name_binaries = search_binaries_by_bin_name_and_checksum(item.bin_name,
                                                                                        bin_checksum)
             checked_file_name[search_key] = find_result
 
