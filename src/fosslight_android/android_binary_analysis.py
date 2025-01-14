@@ -340,10 +340,14 @@ def find_notice_value():
             logger.info(f"Notice file is empty:{notice_files}")
             return
         if notice_files:
+            for notice_file in notice_files:
+                if "NOTICE.txt" in notice_file:
+                    logger.debug(f"NOTICE.txt: {notice_file}")
+                    notice_files.remove(notice_file)
             str_notice_files = ",".join(notice_files)
             logger.info(f"Notice files:{str_notice_files}")
         else:
-            logger.debug("Can't find a notiece file")
+            logger.debug("Can't find a notice file")
         return_list = do_multi_process(find_notice_html, final_bin_info)
         final_bin_info = return_list[:]
 
