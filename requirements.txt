@@ -1,4 +1,4 @@
-fosslight_util~=2.1.0
+fosslight_util~=2.1.8
 fosslight_source~=2.1.0
 fosslight_binary~=5.1.0
 beautifulsoup4
