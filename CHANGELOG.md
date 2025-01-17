@@ -1,5 +1,19 @@
 # Changelog
 
+## v5.0.2 (17/01/2025)
+## Changes
+## 🐛 Hotfixes
+
+- Update FOSSLight Util version for fixing m option bug @soimkim (#32)
+- Fix source code analysis bug @soimkim (#31)
+- Fixe a bug that checks if it's binary or not @soimkim (#29)
+
+## 🔧 Maintenance
+
+- Remove NOTICE.txt from Notice file list in log @soimkim (#30)
+
+---
+
 ## v5.0.1 (01/11/2024)
 ## Changes
 ## 🔧 Maintenance
