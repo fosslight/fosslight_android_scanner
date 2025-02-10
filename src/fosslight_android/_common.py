@@ -98,6 +98,15 @@ class AndroidBinary:
 
     def set_oss_version(self, value):
         self.oss_version = value
+        
+    def clean_decimal_string(self, input_str):
+        try:            
+            num = float(input_str)
+            if num.is_integer():
+                return str(int(num))
+            return input_str
+        except ValueError:            
+            return input_str
 
     def get_print_array(self, return_excel=True):
         print_items_txt = []
@@ -112,6 +121,9 @@ class AndroidBinary:
             need_check = "O"
         else:
             need_check = ""
+        # Check if the decimal places are zero in the OSS version
+        tmp_oss_version = str(self.oss_version)        
+        self.oss_version = self.clean_decimal_string(tmp_oss_version)
         print_items_txt.append(f"{self.bin_name}\t{source_path}\t{self.notice}\t"
                                f"{oss_name}\t{self.oss_version}\t{self.license}\t{need_check}\t{comment}\t{self.tlsh}\t{self.checksum}")
         repo_link = self.download_location if self.is_new_bin else ""
