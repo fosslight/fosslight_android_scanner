@@ -41,6 +41,14 @@ def connect_to_lge_bin_db():
         cur = ""
     return conn, cur
 
+def clean_decimal_string(input_str):
+        try:            
+            num = float(input_str)
+            if num.is_integer():
+                return str(int(num))
+            return input_str
+        except ValueError:            
+            return input_str
 
 def get_oss_info_from_db(platform_version, bin_info_list, return_list):
 
@@ -66,6 +74,8 @@ def get_oss_info_from_db(platform_version, bin_info_list, return_list):
                             item.set_oss_version(row['ossversion'])
                             item.set_license(row['license'])
                         else:  # In case more than 2 OSS is used for this bin.
+                            tmp_oss_version = str(row['ossversion'])        
+                            row['ossversion'] = clean_decimal_string(tmp_oss_version)
                             item.set_additional_oss_items(row['ossname'] + '\t' + row['ossversion'] + '\t' + row['license'])
             except Exception as error:
                 logger.warn(f"READ OSS :{error}")
