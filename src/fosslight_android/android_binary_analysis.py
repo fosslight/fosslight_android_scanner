@@ -173,22 +173,27 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
 def read_module_info_from_build_output_file():
     global module_info_json_obj
 
+    success = True
+
     # Only in case upper 7.0.0 versions have a module-info.mk at build/core/tasks.
     # Lower versions sould copy module-info.mk to build/core/tasks than build it again.
-    if not os.path.isfile(os.path.join(build_out_path, MODULE_INFO_FILE_NAME)):
-        logger.warn("BUILD OUTPUT PATH :", build_out_path)
-        logger.warn("Can't find a module-info.json file at build output path.")
+    module_info_json_file = os.path.join(build_out_path, MODULE_INFO_FILE_NAME)
+    if not os.path.isfile(module_info_json_file):
+        logger.warn(f"BUILD OUTPUT PATH :{build_out_path}")
+        logger.warn(f"Can't find a module-info.json file at build output path.:{module_info_json_file}")
         logger.warn("Please copy module-info.mk file to build/core/tasks than build it again.")
-        sys.exit(1)
-
+        success = False
     try:
-        module_f = os.path.join(build_out_path, MODULE_INFO_FILE_NAME)
-        f = open(module_f, 'r')
+        logger.info(f"READ module-info.json :{module_info_json_file}")
+        f = open(module_info_json_file, 'r')
         module_info_json_obj = json.loads(f.read())
         f.close()
+    except Exception as error:
+        success = False
+        logger.warn(f"[ERROR] Failed to read:{error}")
 
-    except IOError:
-        logger.warn("[ERROR] Cannot read ", MODULE_INFO_FILE_NAME)
+    if not success:
+        sys.exit(1)
 
 
 def set_env_variables_from_result_log():
