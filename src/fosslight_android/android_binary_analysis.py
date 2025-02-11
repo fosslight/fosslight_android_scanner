@@ -197,15 +197,15 @@ def set_env_variables_from_result_log():
     # Check the platform version
     for line in android_log_lines:
         try:
-            line = line.strip()
-            pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+.?\d?)(.*\d*)\S*\s*')
+            line = line.strip()            
+            pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+)\.?\d*\S*\s*')
             matched = pattern.match(line)
             if matched is not None:
                 platform_version = matched.group(1)
                 break
 
         except Exception:
-            pass
+            pass    
 
     # FIND a NOTICE file and build out path
     for line in reversed(android_log_lines):
