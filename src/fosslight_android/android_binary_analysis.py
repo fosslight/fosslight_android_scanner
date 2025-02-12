@@ -156,7 +156,7 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
     else:  # Find binary by installed path
         for key in module_info_json_obj:
             js_value = module_info_json_obj[key]
-            output_files = js_value["installed"]
+            output_files = js_value.get("installed",None)
             if output_files is not None:
                 for output_file in output_files:
                     if output_file == binary_name_with_path:
@@ -167,6 +167,7 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
                         if path_with_out_dir == output_file:
                             js_value[MODULE_TYPE_NAME] = key
                             return js_value
+            
     return ""
 
 
