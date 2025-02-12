@@ -1,5 +1,18 @@
 # Changelog
 
+## v5.0.3 (12/02/2025)
+## Changes
+## 🐛 Hotfixes
+
+- Add exception handling for cases where the 'installed' key is not present @ethanleelge (#36)
+
+## 🔧 Maintenance
+
+- Fix the platform version as an integer @ethanleelge (#35)
+- Update message format when module-info.json cannot be read @soimkim (#34)
+
+---
+
 ## v5.0.2 (17/01/2025)
 ## Changes
 ## 🐛 Hotfixes
