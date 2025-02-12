@@ -155,18 +155,22 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
         return js_value
     else:  # Find binary by installed path
         for key in module_info_json_obj:
-            js_value = module_info_json_obj[key]
-            output_files = js_value["installed"]
-            if output_files is not None:
-                for output_file in output_files:
-                    if output_file == binary_name_with_path:
-                        js_value[MODULE_TYPE_NAME] = key
-                        return js_value
-                    else:
-                        path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
-                        if path_with_out_dir == output_file:
+            try:
+                js_value = module_info_json_obj[key]
+                output_files = js_value["installed"]
+                if output_files is not None:
+                    for output_file in output_files:
+                        if output_file == binary_name_with_path:
                             js_value[MODULE_TYPE_NAME] = key
                             return js_value
+                        else:
+                            path_with_out_dir = os.path.join(build_out_path, binary_name_with_path)
+                            if path_with_out_dir == output_file:
+                                js_value[MODULE_TYPE_NAME] = key
+                                return js_value
+            except KeyError as e:
+                print(f"The 'installed' key does not exist. key: {key}")
+                return ""
     return ""
 
 
