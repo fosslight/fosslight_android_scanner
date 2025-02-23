@@ -763,6 +763,27 @@ def find_meta_lic_files():
                     if lic_list:
                         lic = ','.join(lic_list)
                         meta_lic_files[key] = lic
+                        
+                        
+def create_and_move_notice_zip(notice_files, zip_file_path, destination_folder):  
+    notice_files_list = [file_path.strip() for file_path in notice_files.split(",")]
+    num_of_notice_file = len(notice_files_list)
+    final_destination_file_name =""
+    if len(notice_files_list) == 0:  
+        print(f"There is no notice file at all.")
+    elif len(notice_files_list) == 1:  
+        single_file_path = notice_files_list[0]
+        destination_path = os.path.join(destination_folder, os.path.basename(single_file_path))
+        shutil.copy(single_file_path, destination_path)
+        final_destination_file_name = destination_path 
+        print(f"Notice file is copied to '{destination_path}'.")        
+    else:     
+        with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+            for single_file_path in notice_files_list:                
+                zipf.write(single_file_path, arcname=os.path.basename(single_file_path))
+        final_destination_file_name = zip_file_path               
+                    
+    return num_of_notice_file, final_destination_file_name    
 
 
 def main():
@@ -786,6 +807,7 @@ def main():
     now = datetime.now().strftime('%y%m%d_%H%M')
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
     result_excel_file_name = os.path.join(python_script_dir, f"fosslight_report_android_{now}")
+    result_notice_zip_file_name = os.path.join(python_script_dir, f"notice_to_fosslight-hub_{now}.zip")
     remove_list_file = ""
 
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
@@ -869,13 +891,21 @@ def main():
         set_oss_name_by_repository()
     if analyze_source:
         from ._src_analysis import find_item_to_analyze
-        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
-
+        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)        
+    
+    num_of_notice_file, destination_file = create_and_move_notice_zip(notice_files, result_notice_zip_file_name, python_script_dir)
+    
     scan_item = ScannerItem(PKG_NAME, now)
     scan_item.set_cover_pathinfo(android_src_path, "")
 
     scan_item.set_cover_comment(f"Total number of binaries: {len(final_bin_info)}")
-    scan_item.set_cover_comment(f"\nNotice: {notice_files}")
+    if num_of_notice_file == 0:
+        logger.info(f"There is no notice file at all.")
+        scan_item.set_cover_comment(f"\nThere is no notice file at all.")
+    else:
+        logger.info(f"Notice file to upload FOSSLight Hub: {destination_file}")
+        scan_item.set_cover_comment(f"\nNotice file to upload FOSSLight Hub: {destination_file}")
+
     scan_item.append_file_items(final_bin_info, PKG_NAME)
     success, msg, result_file = write_output_file(result_excel_file_name, RESULT_FILE_EXTENSION,
                                                   scan_item, HEADER, HIDDEN_HEADER)
