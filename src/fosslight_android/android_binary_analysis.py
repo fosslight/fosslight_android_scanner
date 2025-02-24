@@ -338,30 +338,34 @@ def get_result_of_notice_html(found_on_html, notice_file_found):
         return "nok"
 
 
-def find_notice_value():
+def find_notice_value(notice_zip_dest_file=""):
     global notice_file_list, final_bin_info
-    str_notice_files = ""
+    notice_file_comment = "Notice file not found."
 
     try:
         notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
-        if not notice_file_list:
-            logger.info(f"Notice file is empty:{notice_files}")
-            return
-        if notice_files:
-            for notice_file in notice_files:
-                if "NOTICE.txt" in notice_file:
-                    logger.debug(f"NOTICE.txt: {notice_file}")
-                    notice_files.remove(notice_file)
-            str_notice_files = ",".join(notice_files)
-            logger.info(f"Notice files:{str_notice_files}")
-        else:
-            logger.debug("Can't find a notice file")
-        return_list = do_multi_process(find_notice_html, final_bin_info)
-        final_bin_info = return_list[:]
-
-    except IOError as error:  # 'CANNOT_FIND_NOTICE_HTML'
+        if notice_file_list:
+            if notice_files:
+                for notice_file in notice_files:
+                    if "NOTICE.txt" in notice_file:
+                        logger.debug(f"NOTICE.txt: {notice_file}")
+                        notice_files.remove(notice_file)
+                str_notice_files = ",".join(notice_files)
+                logger.debug(f"Notice files:{str_notice_files}")
+                if notice_zip_dest_file:
+                    final_notice_zip = create_and_copy_notice_zip(notice_files, notice_zip_dest_file)
+                    if final_notice_zip:
+                        notice_file_comment = f"Notice file to upload FOSSLight Hub: {final_notice_zip}"
+                    else:
+                        notice_file_comment = "Failed to compress the Notice file."
+            else:
+                logger.debug("Can't find a notice file to read.")
+            return_list = do_multi_process(find_notice_html, final_bin_info)
+            final_bin_info = return_list[:]
+    except Exception as error:
         logger.debug(f"find_notice_value:{error}")
-    return str_notice_files
+    logger.info(notice_file_comment)
+    return notice_file_comment
 
 
 def find_notice_html(bin_info, return_list):
@@ -771,25 +775,22 @@ def find_meta_lic_files():
                         meta_lic_files[key] = lic
                         
                         
-def create_and_move_notice_zip(notice_files, zip_file_path, destination_folder):  
-    notice_files_list = [file_path.strip() for file_path in notice_files.split(",")]
-    num_of_notice_file = len(notice_files_list)
+def create_and_copy_notice_zip(notice_files_list, zip_file_path):
     final_destination_file_name =""
-    if len(notice_files_list) == 0:  
-        print(f"There is no notice file at all.")
-    elif len(notice_files_list) == 1:  
+
+    if len(notice_files_list) == 1:
         single_file_path = notice_files_list[0]
-        destination_path = os.path.join(destination_folder, os.path.basename(single_file_path))
+        destination_path = os.path.join(os.path.dirname(zip_file_path), os.path.basename(single_file_path))
         shutil.copy(single_file_path, destination_path)
         final_destination_file_name = destination_path 
-        print(f"Notice file is copied to '{destination_path}'.")        
+        logger.debug(f"Notice file is copied to '{destination_path}'.")
     else:     
         with zipfile.ZipFile(zip_file_path, 'w') as zipf:
             for single_file_path in notice_files_list:                
                 zipf.write(single_file_path, arcname=os.path.basename(single_file_path))
         final_destination_file_name = zip_file_path               
                     
-    return num_of_notice_file, final_destination_file_name    
+    return final_destination_file_name
 
 
 def main():
@@ -885,7 +886,7 @@ def main():
 
     map_binary_module_name_and_path(find_binaries_from_out_dir())
 
-    notice_files = find_notice_value()
+    notice_result_comment = find_notice_value(result_notice_zip_file_name)
     find_bin_license_info()
 
     set_mk_file_path()  # Mk file path and local path, location of NOTICE file, can be different
@@ -897,20 +898,13 @@ def main():
         set_oss_name_by_repository()
     if analyze_source:
         from ._src_analysis import find_item_to_analyze
-        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)        
-    
-    num_of_notice_file, destination_file = create_and_move_notice_zip(notice_files, result_notice_zip_file_name, python_script_dir)
-    
+        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
+
     scan_item = ScannerItem(PKG_NAME, now)
     scan_item.set_cover_pathinfo(android_src_path, "")
 
     scan_item.set_cover_comment(f"Total number of binaries: {len(final_bin_info)}")
-    if num_of_notice_file == 0:
-        logger.info(f"There is no notice file at all.")
-        scan_item.set_cover_comment(f"\nThere is no notice file at all.")
-    else:
-        logger.info(f"Notice file to upload FOSSLight Hub: {destination_file}")
-        scan_item.set_cover_comment(f"\nNotice file to upload FOSSLight Hub: {destination_file}")
+    scan_item.set_cover_comment(notice_result_comment)
 
     scan_item.append_file_items(final_bin_info, PKG_NAME)
     success, msg, result_file = write_output_file(result_excel_file_name, RESULT_FILE_EXTENSION,
