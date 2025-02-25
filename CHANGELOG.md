@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.0.4 (25/02/2025)
+## Changes
+## 🚀 Features
+
+- Compressing the notice files @ethanleelge  (#38)
+
+---
+
 ## v5.0.3 (12/02/2025)
 ## Changes
 ## 🐛 Hotfixes
