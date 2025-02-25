@@ -10,8 +10,6 @@ import os
 import re
 import json
 import logging
-import zipfile
-import shutil
 # Parsing NOTICE
 from bs4 import BeautifulSoup
 import subprocess
@@ -72,7 +70,7 @@ notice_file_list = {}  # Save file list in NOTICE.html
 platform_version = ""  # Android Version. ex- 7.0.0.r1 -> 7.0
 
 # Define Const Variables
-
+NOTICE_HTML_FILE_NAME = ""
 ANDROID_LOG_FILE_NAME = "android.log"
 num_cores = 1
 now = ""
@@ -200,8 +198,7 @@ def set_env_variables_from_result_log():
     for line in android_log_lines:
         try:
             line = line.strip()
-            #pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+.?\d?)(.*\d*)\S*\s*')
-            pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+)\.?\d*\S*\s*')
+            pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+.?\d?)(.*\d*)\S*\s*')
             matched = pattern.match(line)
             if matched is not None:
                 platform_version = matched.group(1)
@@ -338,8 +335,7 @@ def find_notice_value():
     str_notice_files = ""
 
     try:
-        #notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
-        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path))
+        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
         if not notice_file_list:
             logger.info(f"Notice file is empty:{notice_files}")
             return
@@ -765,33 +761,16 @@ def find_meta_lic_files():
                     if lic_list:
                         lic = ','.join(lic_list)
                         meta_lic_files[key] = lic
-                        
-                        
-def create_and_move_notice_zip(notice_files, zip_file_path, destination_folder):  
-    notice_files_list = [file_path.strip() for file_path in notice_files.split(",")]
-    num_of_notice_file = len(notice_files_list)
-    final_destination_file_name =""
-    if len(notice_files_list) == 0:  
-        print(f"There is no notice file at all.")
-    elif len(notice_files_list) == 1:  
-        single_file_path = notice_files_list[0]
-        destination_path = os.path.join(destination_folder, os.path.basename(single_file_path))
-        shutil.copy(single_file_path, destination_path)
-        final_destination_file_name = destination_path 
-        print(f"Notice file is copied to '{destination_path}'.")        
-    else:     
-        with zipfile.ZipFile(zip_file_path, 'w') as zipf:
-            for single_file_path in notice_files_list:                
-                zipf.write(single_file_path, arcname=os.path.basename(single_file_path))
-        final_destination_file_name = zip_file_path               
-                    
-    return num_of_notice_file, final_destination_file_name    
 
 
 def main():
-    global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info
-    find_empty_path = False  
-    auto_fill_oss_name = True    
+    global android_log_lines, ANDROID_LOG_FILE_NAME, NOTICE_HTML_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info
+    find_empty_path = False
+    _create_additial_notice = False
+    notice_check_ok = False
+    base_binary_txt = ""
+    auto_fill_oss_name = True
+    _NOTICE_CHECKLIST_TYPE = False
     analyze_source = False
     path_to_exclude = []
     RESULT_FILE_EXTENSION = ".xlsx"
@@ -805,18 +784,22 @@ def main():
     now = datetime.now().strftime('%y%m%d_%H%M')
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
     result_excel_file_name = os.path.join(python_script_dir, f"fosslight_report_android_{now}")
-    result_notice_zip_file_name = os.path.join(python_script_dir, f"notice_to_fosslight-hub_{now}.zip")
     remove_list_file = ""
 
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
     parser.add_argument('-h', '--help', action='store_true', required=False)
     parser.add_argument('-v', '--version', action='store_true', required=False)
-    parser.add_argument('-s', '--source', type=str, required=False)    
+    parser.add_argument('-s', '--source', type=str, required=False)
+    parser.add_argument('-b', '--binary', type=str, required=False)
+    parser.add_argument('-n', '--notice', type=str, required=False)
+    parser.add_argument('-t', '--toadd', action='store_true', required=False)
     parser.add_argument('-m', '--more', action='store_true', required=False)
+    parser.add_argument('-c', '--check', type=str, required=False)
     parser.add_argument('-a', '--android', type=str, required=False)
     parser.add_argument('-f', '--find', action='store_true', required=False)
     parser.add_argument('-i', '--ignore', action='store_true', required=False)
-    parser.add_argument('-p', '--packaging', type=str, required=False)    
+    parser.add_argument('-p', '--packaging', type=str, required=False)
+    parser.add_argument('-d', '--divide', type=str, required=False)
     parser.add_argument('-r', '--remove', type=str, required=False)
     parser.add_argument('-e', '--exclude', nargs="*", required=False, default=[])
 
@@ -827,9 +810,18 @@ def main():
         print_version(PKG_NAME)
     if args.source:  # android source path
         os.chdir(args.source)
-        android_src_path = args.source    
+        android_src_path = args.source
+    if args.binary:  # Base model's binary.txt to exclude
+        base_binary_txt = args.binary
+    if args.notice:
+        NOTICE_HTML_FILE_NAME = args.notice
+    if args.toadd:  # Create needtoadd-notice.html file.
+        _create_additial_notice = True
     if args.more:  # Analyze source mode.
-        analyze_source = True    
+        analyze_source = True
+    if args.check:
+        _NOTICE_CHECKLIST_TYPE = True
+        notice_check_ok = (args.check == "ok" or args.check == "OK")
     if args.android:
         ANDROID_LOG_FILE_NAME = args.android
     if args.find:  # Execute "find" command when source path is not found.
@@ -843,9 +835,16 @@ def main():
 
     if args.packaging:
         check_packaging_files(args.packaging)
-        return    
+        return
+    if args.divide:
+        divide_notice_files_by_binary(args.divide, python_script_dir, now)
+        return
     if args.remove:  # Remove the inputted list from the binary list.
-        remove_list_file = args.remove    
+        remove_list_file = args.remove
+
+    if _NOTICE_CHECKLIST_TYPE:
+        run_notice_html_checklist(base_binary_txt, notice_check_ok, NOTICE_HTML_FILE_NAME)
+        return
 
     read_success, android_log_lines = read_file(ANDROID_LOG_FILE_NAME)
     if not read_success:
@@ -868,27 +867,22 @@ def main():
         set_oss_name_by_repository()
     if analyze_source:
         from ._src_analysis import find_item_to_analyze
-        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)        
-    
-    num_of_notice_file, destination_file = create_and_move_notice_zip(notice_files, result_notice_zip_file_name, python_script_dir)
-    
+        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
+
     scan_item = ScannerItem(PKG_NAME, now)
     scan_item.set_cover_pathinfo(android_src_path, "")
 
     scan_item.set_cover_comment(f"Total number of binaries: {len(final_bin_info)}")
-    if num_of_notice_file == 0:
-        logger.info(f"There is no notice file at all.")
-        scan_item.set_cover_comment(f"\nThere is no notice file at all.")
-    else:
-        logger.info(f"Notice file to upload FOSSLight Hub: {destination_file}")
-        scan_item.set_cover_comment(f"\nNotice file to upload FOSSLight Hub: {destination_file}")
-
+    scan_item.set_cover_comment(f"\nNotice: {notice_files}")
     scan_item.append_file_items(final_bin_info, PKG_NAME)
     success, msg, result_file = write_output_file(result_excel_file_name, RESULT_FILE_EXTENSION,
                                                   scan_item, HEADER, HIDDEN_HEADER)
     if not success:
         logger.warning(f"Failed to write result to excel:{msg}")
-    result_log["Output FOSSLight Report"] = f"{result_file}"    
+    result_log["Output FOSSLight Report"] = f"{result_file}"
+
+    if _create_additial_notice:
+        create_additional_notice(final_bin_info, python_script_dir)
 
     # Print the result
     result_log["Output Directory"] = python_script_dir
