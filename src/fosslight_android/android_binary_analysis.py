@@ -342,7 +342,7 @@ def find_notice_value(notice_zip_dest_file=""):
     notice_file_comment = "Notice file not found."
 
     try:
-        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path))
+        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
         if notice_file_list:
             if notice_files:
                 for notice_file in notice_files:
