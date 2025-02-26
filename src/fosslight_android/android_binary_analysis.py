@@ -34,6 +34,7 @@ from .check_package_file import check_packaging_files
 from .check_notice_file import (    
     find_bin_in_notice,
     read_notice_file,
+    create_additional_notice,
     divide_notice_files_by_binary    
 )
 from ._binary_db_controller import get_oss_info_from_db
@@ -797,6 +798,7 @@ def main():
     analyze_source = False
     path_to_exclude = []
     RESULT_FILE_EXTENSION = ".xlsx"
+    _create_additial_notice = False
 
     num_cores = multiprocessing.cpu_count() - 1
     if num_cores < 1:
@@ -822,6 +824,7 @@ def main():
     parser.add_argument('-r', '--remove', type=str, required=False)
     parser.add_argument('-e', '--exclude', nargs="*", required=False, default=[])
     parser.add_argument('-d', '--divide', type=str, required=False)
+    parser.add_argument('-t', '--toadd', action='store_true', required=False)
 
     args = parser.parse_args()
     if args.help:
@@ -851,6 +854,9 @@ def main():
     if args.divide:
         divide_notice_files_by_binary(args.divide, python_script_dir, now)
         return
+    
+    if args.toadd:  # Create needtoadd-notice.html file.
+        _create_additial_notice = True
     
     if args.remove:  # Remove the inputted list from the binary list.
         remove_list_file = args.remove    
@@ -889,6 +895,9 @@ def main():
     if not success:
         logger.warning(f"Failed to write result to excel:{msg}")
     result_log["Output FOSSLight Report"] = f"{result_file}"
+    
+    if _create_additial_notice:
+        create_additional_notice(final_bin_info, python_script_dir)
     
     # Print the result
     result_log["Output Directory"] = python_script_dir
