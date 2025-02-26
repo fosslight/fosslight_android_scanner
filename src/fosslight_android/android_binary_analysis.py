@@ -33,7 +33,8 @@ from ._util import (
 from .check_package_file import check_packaging_files
 from .check_notice_file import (    
     find_bin_in_notice,
-    read_notice_file    
+    read_notice_file,
+    divide_notice_files_by_binary    
 )
 from ._binary_db_controller import get_oss_info_from_db
 from ._common import (
@@ -820,6 +821,7 @@ def main():
     parser.add_argument('-p', '--packaging', type=str, required=False)    
     parser.add_argument('-r', '--remove', type=str, required=False)
     parser.add_argument('-e', '--exclude', nargs="*", required=False, default=[])
+    parser.add_argument('-d', '--divide', type=str, required=False)
 
     args = parser.parse_args()
     if args.help:
@@ -845,6 +847,11 @@ def main():
     if args.packaging:
         check_packaging_files(args.packaging)
         return    
+    
+    if args.divide:
+        divide_notice_files_by_binary(args.divide, python_script_dir, now)
+        return
+    
     if args.remove:  # Remove the inputted list from the binary list.
         remove_list_file = args.remove    
     read_success, android_log_lines = read_file(ANDROID_LOG_FILE_NAME)
