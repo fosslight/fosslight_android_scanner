@@ -791,9 +791,7 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
 
 def main():
     global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info
-    find_empty_path = False    
-    notice_check_ok = False
-    base_binary_txt = ""
+    find_empty_path = False            
     auto_fill_oss_name = True    
     analyze_source = False
     path_to_exclude = []
@@ -830,11 +828,9 @@ def main():
         print_version(PKG_NAME)
     if args.source:  # android source path
         os.chdir(args.source)
-        android_src_path = args.source
-    
+        android_src_path = args.source    
     if args.more:  # Analyze source mode.
-        analyze_source = True
-    
+        analyze_source = True    
     if args.android:
         ANDROID_LOG_FILE_NAME = args.android
     if args.find:  # Execute "find" command when source path is not found.
@@ -848,11 +844,9 @@ def main():
 
     if args.packaging:
         check_packaging_files(args.packaging)
-        return
-    
+        return    
     if args.remove:  # Remove the inputted list from the binary list.
         remove_list_file = args.remove    
-
     read_success, android_log_lines = read_file(ANDROID_LOG_FILE_NAME)
     if not read_success:
         logger.error("(-a option) Fail to read a file:" + ANDROID_LOG_FILE_NAME)
