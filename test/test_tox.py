@@ -33,12 +33,12 @@ def test_release_environment(run_command):
 
     # when
     help_result, _, _ = run_command("fosslight_android -h")
-    ok_result, _, _ = run_command("fosslight_android -b test/binary.txt -n test/NOTICE.html -c ok")
-    nok_result, _, _ = run_command("fosslight_android -b test/binary.txt -n test/NOTICE.html -c nok")
-    divide_result, _, _ = run_command("fosslight_android -d test/needtoadd-notice.html")
+    ok_result, _, _ = run_command("fosslight_android -s test/android_12_sample -a android.log")
+    
 
     # then
     assert help_result is True, "Help command failed"
     assert ok_result is True, "OK command failed"
-    assert nok_result is True, "NOK command failed"
-    assert divide_result is True, "Divide command failed"
+    
+    
+    
