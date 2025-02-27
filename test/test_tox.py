@@ -33,7 +33,7 @@ def test_release_environment(run_command):
 
     # when
     help_result, _, _ = run_command("fosslight_android -h")
-    ok_result, _, _ = run_command("fosslight_android -s test/android_12_sample -a test/android_12_sample/android.log")
+    ok_result, _, _ = run_command("fosslight_android -s test/android_12_sample -a android.log")
     
 
     # then
