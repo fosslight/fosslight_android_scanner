@@ -96,7 +96,8 @@ def find_files_by_extension(path):
     return files
 
 
-def read_notice_file(notice_file_path, notice_html_file):
+#def read_notice_file(notice_file_path, notice_html_file):
+def read_notice_file(notice_file_path):
     final_notice_file = {}
     # NOTICE.html need to be skipped the errors related to decode
     encodings = ["latin-1", "utf-8", "utf-16"]

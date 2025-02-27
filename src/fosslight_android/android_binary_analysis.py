@@ -342,7 +342,7 @@ def find_notice_value(notice_zip_dest_file=""):
     notice_file_comment = "Notice file not found."
 
     try:
-        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path), NOTICE_HTML_FILE_NAME)
+        notice_file_list, notice_files = read_notice_file(os.path.abspath(build_out_notice_file_path))
         if notice_file_list:
             if notice_files:
                 for notice_file in notice_files:
@@ -792,16 +792,14 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
     return final_destination_file_name
 
 
-def main():
-    global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info, NOTICE_HTML_FILE_NAME
-    find_empty_path = False            
+def main():    
+    global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info
+    find_empty_path = False    
+    notice_check_ok = False    
     auto_fill_oss_name = True    
     analyze_source = False
     path_to_exclude = []
     RESULT_FILE_EXTENSION = ".xlsx"
-    _create_additial_notice = False
-    _NOTICE_CHECKLIST_TYPE = False
-    base_binary_txt = ""
 
     num_cores = multiprocessing.cpu_count() - 1
     if num_cores < 1:
@@ -819,18 +817,13 @@ def main():
     parser.add_argument('-h', '--help', action='store_true', required=False)
     parser.add_argument('-v', '--version', action='store_true', required=False)
     parser.add_argument('-s', '--source', type=str, required=False)    
-    parser.add_argument('-m', '--more', action='store_true', required=False)    
+    parser.add_argument('-m', '--more', action='store_true', required=False)         
     parser.add_argument('-a', '--android', type=str, required=False)
     parser.add_argument('-f', '--find', action='store_true', required=False)
     parser.add_argument('-i', '--ignore', action='store_true', required=False)
     parser.add_argument('-p', '--packaging', type=str, required=False)    
     parser.add_argument('-r', '--remove', type=str, required=False)
     parser.add_argument('-e', '--exclude', nargs="*", required=False, default=[])
-    parser.add_argument('-d', '--divide', type=str, required=False)
-    parser.add_argument('-t', '--toadd', action='store_true', required=False)
-    parser.add_argument('-n', '--notice', type=str, required=False)
-    parser.add_argument('-c', '--check', type=str, required=False)
-    parser.add_argument('-b', '--binary', type=str, required=False)
 
     args = parser.parse_args()
     if args.help:
@@ -842,13 +835,6 @@ def main():
         android_src_path = args.source    
     if args.more:  # Analyze source mode.
         analyze_source = True    
-        
-    if args.binary:  # Base model's binary.txt to exclude
-        base_binary_txt = args.binary
-        
-    if args.check:
-        _NOTICE_CHECKLIST_TYPE = True
-        notice_check_ok = (args.check == "ok" or args.check == "OK")
     if args.android:
         ANDROID_LOG_FILE_NAME = args.android
     if args.find:  # Execute "find" command when source path is not found.
@@ -863,18 +849,7 @@ def main():
     if args.packaging:
         check_packaging_files(args.packaging)
         return    
-    
-    if args.divide:
-        divide_notice_files_by_binary(args.divide, python_script_dir, now)
-        return    
-    if args.toadd:  # Create needtoadd-notice.html file.
-        _create_additial_notice = True
-    if args.notice:
-        NOTICE_HTML_FILE_NAME = args.notice
-    if _NOTICE_CHECKLIST_TYPE:
-        run_notice_html_checklist(base_binary_txt, notice_check_ok, NOTICE_HTML_FILE_NAME)
-        return
-    
+       
     if args.remove:  # Remove the inputted list from the binary list.
         remove_list_file = args.remove    
     read_success, android_log_lines = read_file(ANDROID_LOG_FILE_NAME)
@@ -912,14 +887,12 @@ def main():
     if not success:
         logger.warning(f"Failed to write result to excel:{msg}")
     result_log["Output FOSSLight Report"] = f"{result_file}"
-    
-    if _create_additial_notice:
-        create_additional_notice(final_bin_info, python_script_dir)
-    
+
     # Print the result
     result_log["Output Directory"] = python_script_dir
     try:
-        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)
+        #str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)
+        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True)
         logger.info(str_final_result_log)
     except Exception as ex:
         logger.warning(f"Failed to print result log. : {ex}")
