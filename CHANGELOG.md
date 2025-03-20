@@ -1,5 +1,35 @@
 # Changelog
 
+## v5.0.5 (01/01/1970)
+## Changes
+## 🔧 Maintenance
+
+- remove some options @ethanleelge (#41)
+
+---
+
+## Remove some options (05/03/2025)
+Remove some options
+
+[Option: -b, -n, -c]
+Checked whether the Binary name is included in NOTICE.html.
+This step is unnecessary as the inclusion of notice is checked through the FL Hub.
+
+[Option: -t]
+For binaries where NOTICE is located in the source code path but not added to NOTICE.html, NOTICE is aggregated.
+This can be handled using the Supplement feature of FL Hub.
+
+[Option: -d]
+The needtoadd-notice.html file is divided by binary.
+This can also be managed using the Supplement feature of FL Hub.
+
+## What's Changed
+* remove some options by @ethanleelge in https://github.com/fosslight/fosslight_android_scanner/pull/41
+
+
+**Full Changelog**: https://github.com/fosslight/fosslight_android_scanner/compare/v5.0.4...v5.0.5
+---
+
 ## v5.0.4 (25/02/2025)
 ## Changes
 ## 🚀 Features
