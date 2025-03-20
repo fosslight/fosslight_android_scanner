@@ -31,12 +31,9 @@ from ._util import (
     get_path_by_using_find
 )
 from .check_package_file import check_packaging_files
-from .check_notice_file import (  
-    run_notice_html_checklist,  
+from .check_notice_file import (      
     find_bin_in_notice,
-    read_notice_file,
-    create_additional_notice,
-    divide_notice_files_by_binary    
+    read_notice_file    
 )
 from ._binary_db_controller import get_oss_info_from_db
 from ._common import (
@@ -891,8 +888,7 @@ def main():
     # Print the result
     result_log["Output Directory"] = python_script_dir
     try:
-        #str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)
-        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True)
+        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)        
         logger.info(str_final_result_log)
     except Exception as ex:
         logger.warning(f"Failed to print result log. : {ex}")

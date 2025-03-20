@@ -96,29 +96,12 @@ def find_files_by_extension(path):
     return files
 
 
-#def read_notice_file(notice_file_path, notice_html_file):
 def read_notice_file(notice_file_path):
     final_notice_file = {}
     # NOTICE.html need to be skipped the errors related to decode
     encodings = ["latin-1", "utf-8", "utf-16"]
     notice_files = []
-    
-    '''
-    if notice_html_file != "":
-        notice_files = notice_html_file.split(",")
-    else:
-        if os.path.isfile(notice_file_path):
-            notice_files.append(notice_file_path)
-        if notice_file_path.endswith(".html") or notice_file_path.endswith(".xml") or notice_file_path.endswith(".txt"):
-            notice_file_path = os.path.dirname(notice_file_path)
-
-        if os.path.isdir(notice_file_path):
-            additional_notice_files = find_files_by_extension(notice_file_path)
-            if len(additional_notice_files) > 0:
-                notice_files.extend(additional_notice_files)
-                notice_files = list(set(notice_files))    
-    '''
-    
+       
     if os.path.isfile(notice_file_path):
         notice_files.append(notice_file_path)
     if notice_file_path.endswith(".html") or notice_file_path.endswith(".xml") or notice_file_path.endswith(".txt"):
