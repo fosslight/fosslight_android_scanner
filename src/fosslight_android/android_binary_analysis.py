@@ -15,7 +15,6 @@ import shutil
 # Parsing NOTICE
 from bs4 import BeautifulSoup
 import subprocess
-# For tlsh comparison
 import tlsh
 import hashlib
 # For checking repository name
