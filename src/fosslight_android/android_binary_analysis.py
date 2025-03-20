@@ -31,12 +31,9 @@ from ._util import (
     get_path_by_using_find
 )
 from .check_package_file import check_packaging_files
-from .check_notice_file import (  
-    run_notice_html_checklist,  
+from .check_notice_file import (
     find_bin_in_notice,
-    read_notice_file,
-    create_additional_notice,
-    divide_notice_files_by_binary    
+    read_notice_file
 )
 from ._binary_db_controller import get_oss_info_from_db
 from ._common import (
@@ -157,7 +154,7 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
     else:  # Find binary by installed path
         for key in module_info_json_obj:
             js_value = module_info_json_obj[key]
-            output_files = js_value.get("installed",None)
+            output_files = js_value.get("installed", None)
             if output_files is not None:
                 for output_file in output_files:
                     if output_file == binary_name_with_path:
@@ -168,7 +165,6 @@ def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, bi
                         if path_with_out_dir == output_file:
                             js_value[MODULE_TYPE_NAME] = key
                             return js_value
-            
     return ""
 
 
@@ -204,7 +200,7 @@ def set_env_variables_from_result_log():
     # Check the platform version
     for line in android_log_lines:
         try:
-            line = line.strip()            
+            line = line.strip()
             pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+)\.?\d*\S*\s*')
             matched = pattern.match(line)
             if matched is not None:
@@ -212,7 +208,7 @@ def set_env_variables_from_result_log():
                 break
 
         except Exception:
-            pass    
+            pass
 
     # FIND a NOTICE file and build out path
     for line in reversed(android_log_lines):
@@ -277,7 +273,6 @@ def find_binaries_from_out_dir():
     tmp_files = []
     for file_rel_path in return_list:
         if any(re.search(re_except_path, file_rel_path) for re_except_path in EXCEPTIONAL_PATH):
-            #logger.debug(f"REMOVE (Exceptional Path):{file_rel_path}")
             continue
         else:
             bin_item = AndroidBinary(os.path.abspath(file_rel_path))
@@ -720,7 +715,6 @@ def return_shorter_installed_path_data(origin, new):
     else:
         origin_path = origin.bin_name
         new_path = new.bin_name
-
         if len(origin_path) > len(new_path):
             return new
         elif len(origin_path) == 0:
@@ -772,31 +766,30 @@ def find_meta_lic_files():
                     if lic_list:
                         lic = ','.join(lic_list)
                         meta_lic_files[key] = lic
-                        
-                        
+
+
 def create_and_copy_notice_zip(notice_files_list, zip_file_path):
-    final_destination_file_name =""
+    final_destination_file_name = ""
 
     if len(notice_files_list) == 1:
         single_file_path = notice_files_list[0]
         destination_path = os.path.join(os.path.dirname(zip_file_path), os.path.basename(single_file_path))
         shutil.copy(single_file_path, destination_path)
-        final_destination_file_name = destination_path 
+        final_destination_file_name = destination_path
         logger.debug(f"Notice file is copied to '{destination_path}'.")
-    else:     
+    else:
         with zipfile.ZipFile(zip_file_path, 'w') as zipf:
-            for single_file_path in notice_files_list:                
+            for single_file_path in notice_files_list:
                 zipf.write(single_file_path, arcname=os.path.basename(single_file_path))
-        final_destination_file_name = zip_file_path               
-                    
+        final_destination_file_name = zip_file_path
+
     return final_destination_file_name
 
 
-def main():    
+def main():
     global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info
-    find_empty_path = False    
-    notice_check_ok = False    
-    auto_fill_oss_name = True    
+    find_empty_path = False
+    auto_fill_oss_name = True
     analyze_source = False
     path_to_exclude = []
     RESULT_FILE_EXTENSION = ".xlsx"
@@ -816,12 +809,12 @@ def main():
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
     parser.add_argument('-h', '--help', action='store_true', required=False)
     parser.add_argument('-v', '--version', action='store_true', required=False)
-    parser.add_argument('-s', '--source', type=str, required=False)    
-    parser.add_argument('-m', '--more', action='store_true', required=False)         
+    parser.add_argument('-s', '--source', type=str, required=False)
+    parser.add_argument('-m', '--more', action='store_true', required=False)
     parser.add_argument('-a', '--android', type=str, required=False)
     parser.add_argument('-f', '--find', action='store_true', required=False)
     parser.add_argument('-i', '--ignore', action='store_true', required=False)
-    parser.add_argument('-p', '--packaging', type=str, required=False)    
+    parser.add_argument('-p', '--packaging', type=str, required=False)
     parser.add_argument('-r', '--remove', type=str, required=False)
     parser.add_argument('-e', '--exclude', nargs="*", required=False, default=[])
 
@@ -830,11 +823,11 @@ def main():
         print_help_msg()
     if args.version:
         print_version(PKG_NAME)
-    if args.source:  # android source path
+    if args.source:
         os.chdir(args.source)
-        android_src_path = args.source    
+        android_src_path = args.source
     if args.more:  # Analyze source mode.
-        analyze_source = True    
+        analyze_source = True
     if args.android:
         ANDROID_LOG_FILE_NAME = args.android
     if args.find:  # Execute "find" command when source path is not found.
@@ -848,10 +841,10 @@ def main():
 
     if args.packaging:
         check_packaging_files(args.packaging)
-        return    
-       
+        return
+
     if args.remove:  # Remove the inputted list from the binary list.
-        remove_list_file = args.remove    
+        remove_list_file = args.remove
     read_success, android_log_lines = read_file(ANDROID_LOG_FILE_NAME)
     if not read_success:
         logger.error("(-a option) Fail to read a file:" + ANDROID_LOG_FILE_NAME)
@@ -891,8 +884,7 @@ def main():
     # Print the result
     result_log["Output Directory"] = python_script_dir
     try:
-        #str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)
-        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True)
+        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)
         logger.info(str_final_result_log)
     except Exception as ex:
         logger.warning(f"Failed to print result log. : {ex}")

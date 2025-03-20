@@ -21,7 +21,7 @@ _HELP_MESSAGE = """
             -m\t\t\t\t   Analyze the source code for the path where the license could not be found.
             -e <path1> <path2..>\t   Path to exclude from source analysis.
             -p\t\t\t\t   Check files that should not be included in the Packaging file.
-            -f\t\t\t\t   Print result of Find Command for binary that can not find Source Code Path.            
+            -f\t\t\t\t   Print result of Find Command for binary that can not find Source Code Path.
             -i\t\t\t\t   Disable the function to automatically convert OSS names based on AOSP.
             -r <result.txt>\t\t   result.txt file with a list of binaries to remove."""
 
