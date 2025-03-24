@@ -39,11 +39,12 @@ HTML_ESCAPE_TABLE = {
     '"': "&quot;",
     "'": "&apos;",
     ">": "&gt;",
-    "<": "&lt;",
-    }
+    "<": "&lt;"}
+
 
 def hexify(s):
-    return ("%02x"*len(s)) % tuple(map(ord, s))
+    return ("%02x" * len(s)) % tuple(map(ord, s))
+
 
 def md5sum(filename):
     """Calculate an MD5 of the file given by FILENAME,
@@ -63,9 +64,10 @@ def md5sum(filename):
 
 def html_escape(text):
     """Produce entities within text."""
-    return "".join(HTML_ESCAPE_TABLE.get(c,c) for c in text)
+    return "".join(HTML_ESCAPE_TABLE.get(c, c) for c in text)
 
-HTML_OUTPUT_CSS="""
+
+HTML_OUTPUT_CSS = """
 <style type="text/css">
 body { padding: 0; font-family: sans-serif; }
 .same-license { background-color: #eeeeee; border-top: 20px solid white; padding: 10px; }
@@ -73,6 +75,7 @@ body { padding: 0; font-family: sans-serif; }
 .file-list { margin-left: 1em; color: blue; }
 </style>
 """
+
 
 def combine_notice_files_html(file_hash, input_dirs, output_filename):
     """Combine notice files in FILE_HASH and output a HTML version to OUTPUT_FILENAME."""
@@ -85,19 +88,19 @@ def combine_notice_files_html(file_hash, input_dirs, output_filename):
     id_count = 0
     for value in file_hash:
         for filename in value:
-             id_table[filename] = id_count
+            id_table[filename] = id_count
         id_count += 1
 
     # Open the output file, and output the header pieces
     output_file = open(output_filename, "wb")
 
-    print >> output_file, "<html><head>"
-    print >> output_file, HTML_OUTPUT_CSS
-    print >> output_file, '</head><body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">'
+    print("<html><head>", file=output_file)
+    print(HTML_OUTPUT_CSS, file=output_file)
+    print('</head><body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">', file=output_file)
 
     # Output our table of contents
-    print >> output_file, '<div class="toc">'
-    print >> output_file, "<ul>"
+    print('<div class="toc">', file=output_file)
+    print("<ul>", file=output_file)
 
     # Flatten the list of lists into a single list of filenames
     sorted_filenames = sorted(itertools.chain.from_iterable(file_hash))
@@ -105,47 +108,49 @@ def combine_notice_files_html(file_hash, input_dirs, output_filename):
     # Print out a nice table of contents
     for filename in sorted_filenames:
         stripped_filename = SRC_DIR_STRIP_RE.sub(r"\1", filename)
-        print >> output_file, '<li><a href="#id%d">%s</a></li>' % (id_table.get(filename), stripped_filename)
+        print('<li><a href="#id%d">%s</a></li>' % (id_table.get(filename), stripped_filename), file=output_file)
 
-    print >> output_file, "</ul>"
-    print >> output_file, "</div><!-- table of contents -->"
+    print("<ul>", file=output_file)
+    print("</div><!-- table of contents -->", file=output_file)
     # Output the individual notice file lists
-    print >>output_file, '<table cellpadding="0" cellspacing="0" border="0">'
+    print('<table cellpadding="0" cellspacing="0" border="0">', file=output_file)
     for value in file_hash:
-        print >> output_file, '<tr id="id%d"><td class="same-license">' % id_table.get(value[0])
-        print >> output_file, '<div class="label">Notices for file(s):</div>'
-        print >> output_file, '<div class="file-list">'
+        print('<tr id="id%d"><td class="same-license">' % id_table.get(value[0]), file=output_file)
+        print('<div class="label">Notices for file(s):</div>', file=output_file)
         for filename in value:
-            print >> output_file, "%s <br/>" % (SRC_DIR_STRIP_RE.sub(r"\1", filename))
-        print >> output_file, "</div><!-- file-list -->"
-        print >> output_file
-        print >> output_file, '<pre class="license-text">'
-        print >> output_file, html_escape(open(value[0]).read())
-        print >> output_file, "</pre><!-- license-text -->"
-        print >> output_file, "</td></tr><!-- same-license -->"
-        print >> output_file
-        print >> output_file
-        print >> output_file
+            print("%s <br/>" % (SRC_DIR_STRIP_RE.sub(r"\1", filename)), file=output_file)
+        print("</div><!-- file-list -->", file=output_file)
+        print(file=output_file)
+        print('<pre class="license-text">', file=output_file)
+        print(html_escape(open(value[0]).read()), file=output_file)
+        print("</pre><!-- license-text -->", file=output_file)
+        print("</td></tr><!-- same-license -->", file=output_file)
+        print(file=output_file)
+        print(file=output_file)
+        print(file=output_file)
 
     # Finish off the file output
-    print >> output_file, "</table>"
-    print >> output_file, "</body></html>"
+    print("</table>", file=output_file)
+    print("</body></html>", file=output_file)
     output_file.close()
+
 
 def combine_notice_files_text(file_hash, input_dirs, output_filename, file_title):
     """Combine notice files in FILE_HASH and output a text version to OUTPUT_FILENAME."""
 
     SRC_DIR_STRIP_RE = re.compile("(?:" + "|".join(re.escape(input_dirs)) + ")(/.*).txt")
     output_file = open(output_filename, "wb")
-    print >> output_file, file_title
+    print(file_title, file=output_file)
     for value in file_hash:
-      print >> output_file, "============================================================"
-      print >> output_file, "Notices for file(s):"
-      for filename in value:
-        print >> output_file, SRC_DIR_STRIP_RE.sub(r"\1", filename)
-      print >> output_file, "------------------------------------------------------------"
-      print >> output_file, open(value[0]).read()
+        print("============================================================", file=output_file)
+        print("Notices for file(s):", file=output_file)
+
+        for filename in value:
+            print(SRC_DIR_STRIP_RE.sub(r"\1", filename), file=output_file)
+        print("------------------------------------------------------------", file=output_file)
+        print(open(value[0]).read(), file=output_file)
     output_file.close()
+
 
 def combine_notice_files_xml(files_with_same_hash, input_dirs, output_filename):
     """Combine notice files in FILE_HASH and output a XML version to OUTPUT_FILENAME."""
@@ -157,13 +162,13 @@ def combine_notice_files_xml(files_with_same_hash, input_dirs, output_filename):
     id_table = {}
     for file_key in files_with_same_hash.keys():
         for filename in files_with_same_hash[file_key]:
-             id_table[filename] = file_key
+            id_table[filename] = file_key
 
     # Open the output file, and output the header pieces
     output_file = open(output_filename, "wb")
 
-    print >> output_file, '<?xml version="1.0" encoding="utf-8"?>'
-    print >> output_file, "<licenses>"
+    print('<?xml version="1.0" encoding="utf-8"?>', file=output_file)
+    print("<licenses>", file=output_file)
 
     # Flatten the list of lists into a single list of filenames
     sorted_filenames = sorted(id_table.keys())
@@ -171,10 +176,10 @@ def combine_notice_files_xml(files_with_same_hash, input_dirs, output_filename):
     # Print out a nice table of contents
     for filename in sorted_filenames:
         stripped_filename = SRC_DIR_STRIP_RE.sub(r"\1", filename)
-        print >> output_file, '<file-name contentId="%s">%s</file-name>' % (id_table.get(filename), stripped_filename)
+        print('<file-name contentId="%s">%s</file-name>' % (id_table.get(filename), stripped_filename), file=output_file)
 
-    print >> output_file
-    print >> output_file
+    print(file=output_file)
+    print(file=output_file)
 
     processed_file_keys = []
     # Output the individual notice file lists
@@ -184,12 +189,13 @@ def combine_notice_files_xml(files_with_same_hash, input_dirs, output_filename):
             continue
         processed_file_keys.append(file_key)
 
-        print >> output_file, '<file-content contentId="%s"><![CDATA[%s]]></file-content>' % (file_key, html_escape(open(filename).read()))
-        print >> output_file
+        print('<file-content contentId="%s"><![CDATA[%s]]></file-content>' % (file_key, html_escape(open(filename).read())), file=output_file)
+        print(file=output_file)
 
     # Finish off the file output
-    print >> output_file, "</licenses>"
+    print("</licenses>", file=output_file)
     output_file.close()
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -216,6 +222,7 @@ def get_args():
         help='The sub directories which should be excluded.')
     return parser.parse_args()
 
+
 def main(argv):
     args = get_args()
 
@@ -229,7 +236,7 @@ def main(argv):
         included_subdirs = args.included_subdirs
     if args.excluded_subdirs is not None:
         excluded_subdirs = args.excluded_subdirs
- 
+
     notice_files_to_append = os.path.join(args.source_dir[0], "notice")
     copy_notice_files.copy_and_create_dir(notice_files_to_append)
     input_dirs = [os.path.normpath(source_dir) for source_dir in args.source_dir]
@@ -242,14 +249,16 @@ def main(argv):
                 if len(included_subdirs) > 0:
                     matched = False
                     for subdir in included_subdirs:
-                        if (root == (input_dir + '/' + subdir) or
-                            root.startswith(input_dir + '/' + subdir + '/')):
+                        matches_subdir = root == (input_dir + '/' + subdir)
+                        starts_with_subdir = root.startswith(input_dir + '/' + subdir + '/')
+                        if matches_subdir or starts_with_subdir:
                             matched = True
                             break
                 elif len(excluded_subdirs) > 0:
                     for subdir in excluded_subdirs:
-                        if (root == (input_dir + '/' + subdir) or
-                            root.startswith(input_dir + '/' + subdir + '/')):
+                        matches_subdir = root == (input_dir + '/' + subdir)
+                        starts_with_subdir = root.startswith(input_dir + '/' + subdir + '/')
+                        if matches_subdir or starts_with_subdir:
                             matched = False
                             break
                 if root.startswith(notice_files_to_append):
@@ -267,6 +276,7 @@ def main(argv):
 
     if xml_output_file is not None:
         combine_notice_files_xml(files_with_same_hash, input_dirs, xml_output_file)
+
 
 if __name__ == "__main__":
     main(sys.argv)

@@ -33,12 +33,8 @@ def test_release_environment(run_command):
 
     # when
     help_result, _, _ = run_command("fosslight_android -h")
-    ok_result, _, _ = run_command("fosslight_android -s test/android_12_sample -a android.log")
-    
+    success, _, _ = run_command("fosslight_android -s test/android_12_sample -a android.log")
 
     # then
     assert help_result is True, "Help command failed"
-    assert ok_result is True, "OK command failed"
-    
-    
-    
+    assert success is True, "Test was failed"

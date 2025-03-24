@@ -29,5 +29,5 @@ def copy_and_create_dir(input_dir):
                         if not os.path.exists(os.path.join(dist_path, file)):
                             shutil.copy2(src_file, dist_path)
 
-                    except Exception as e:
+                    except Exception:
                         pass
