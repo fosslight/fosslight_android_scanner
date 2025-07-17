@@ -17,7 +17,7 @@ with open('requirements.txt', 'r', 'utf-8') as f:
 if __name__ == "__main__":
     setup(
         name='fosslight_android',
-        version='5.0.6',
+        version='5.0.8',
         package_dir={"": "src"},
         packages=find_packages(where='src'),
         description='FOSSLight Android Scanner',
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         url='https://github.com/fosslight/fosslight_android_scanner',
         download_url='https://github.com/fosslight/fosslight_android_scanner',
         classifiers=['License :: OSI Approved :: Apache Software License',
-                     "Programming Language :: Python :: 3",
+                     "Programming Language :: Python :: 3",                     
                      "Programming Language :: Python :: 3.10",
                      "Programming Language :: Python :: 3.11",
                      "Programming Language :: Python :: 3.12"],

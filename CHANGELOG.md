@@ -1,5 +1,21 @@
 # Changelog
 
+## v5.0.8 (17/07/2025)
+## Changes
+## 🔧 Maintenance
+
+- Update setup.py @ethanleelge (#47)
+- Keep the line "Programming Language :: Python :: 3" in setup.py
+---
+
+## v5.0.7 (17/07/2025)
+## Changes
+## 🔧 Maintenance
+
+- Modify setup.py to change the supported Python version to 3.10 - 3.12 @ethanleelge (#46)
+
+---
+
 ## v5.0.6 (28/03/2025)
 ## Changes
 ## 🔧 Maintenance
