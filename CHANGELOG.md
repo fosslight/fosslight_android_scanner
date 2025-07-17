@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.0.9 (17/07/2025)
+## Changes
+## 🔧 Maintenance
+
+- Update setup.py @ethanleelge (#48)
+
+---
+
 ## v5.0.8 (17/07/2025)
 ## Changes
 ## 🔧 Maintenance
