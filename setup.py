@@ -28,7 +28,7 @@ if __name__ == "__main__":
         url='https://github.com/fosslight/fosslight_android_scanner',
         download_url='https://github.com/fosslight/fosslight_android_scanner',
         classifiers=['License :: OSI Approved :: Apache Software License',
-                     "Programming Language :: Python :: 3",                     
+                     "Programming Language :: Python :: 3",
                      "Programming Language :: Python :: 3.10",
                      "Programming Language :: Python :: 3.11",
                      "Programming Language :: Python :: 3.12"],
