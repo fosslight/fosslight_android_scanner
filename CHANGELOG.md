@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.0.10 (31/07/2025)
+## Changes
+## 🐛 Hotfixes
+
+- Print download location without checking new binary @soimkim (#49)
+
+---
+
 ## v5.0.9 (17/07/2025)
 ## Changes
 ## 🔧 Maintenance
