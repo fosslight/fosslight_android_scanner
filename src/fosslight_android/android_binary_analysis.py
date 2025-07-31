@@ -732,7 +732,7 @@ def set_oss_name_by_repository():
                 source_path = item.source_code_path
                 item_license = item.license
                 if (oss_name == CONST_NULL or oss_name == "Android Open Source Project") and source_path != CONST_NULL:
-                    if item_license not in skip_license:
+                    if (not item_license) or (item_license not in skip_license):
                         item.oss_name, item.oss_version, item.download_location = get_oss_component_name(source_path, oss_name, item.oss_version)
                         item.homepage = item.download_location
             except Exception as error:
