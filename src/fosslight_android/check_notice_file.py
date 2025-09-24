@@ -104,8 +104,8 @@ def read_notice_file(notice_file_path):
 
     if os.path.isfile(notice_file_path):
         notice_files.append(notice_file_path)
-    if notice_file_path.endswith(".html") or notice_file_path.endswith(".xml") or notice_file_path.endswith(".txt"):
-        notice_file_path = os.path.dirname(notice_file_path)
+        if notice_file_path.endswith((".xml", ".html", ".txt", "xml.gz")):
+            notice_file_path = os.path.dirname(notice_file_path)
 
     if os.path.isdir(notice_file_path):
         additional_notice_files = find_files_by_extension(notice_file_path)
