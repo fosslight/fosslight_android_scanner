@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.0.11 (24/09/2025)
+## Changes
+## 🐛 Hotfixes
+
+- Find build output path from new format build log @soimkim (#50)
+
+---
+
 ## v5.0.10 (31/07/2025)
 ## Changes
 ## 🐛 Hotfixes
