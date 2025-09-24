@@ -211,30 +211,29 @@ def set_env_variables_from_result_log():
             pass
 
     # FIND a NOTICE file and build out path
+    pattern_notice = r'\[.*?\]\s*build\s+(([^\s]*?)/obj/NOTICE\.(?:xml(?:\.gz)?|html|txt))'
     for line in reversed(android_log_lines):
-        line = line.strip()
-        if line.endswith("obj/NOTICE.xml") or line.endswith("obj/NOTICE.html") or line.endswith("obj/NOTICE.txt"):
-            words = line.split()
-            build_out_notice_file_path = words[-1]
-            find_idx = build_out_notice_file_path.find("obj/")
-            build_out_path = build_out_notice_file_path[:find_idx]
+        match = re.search(pattern_notice, line)
+        if match:
+            build_out_notice_file_path = match.group(1)
+            build_out_path = match.group(2)
             break
 
-    if build_out_path == "":
+    if not build_out_path:
+        pattern = re.compile(r'.*Installed file list:\s*([^\s]+)')
         for line in reversed(android_log_lines):
             try:
-                pattern = re.compile(r'.*Installed file list\s*(.*):\s*(.*)')
                 matched = pattern.match(line)
                 if matched is not None:
-                    build_out_path = os.path.dirname(matched.group(2))
+                    build_out_path = os.path.dirname(matched.group(1))
                     break
             except Exception:
                 pass
-        if build_out_path == "":
+        if not build_out_path:
             logger.error("Can't find a build output path.")
             sys.exit(1)
 
-    if build_out_notice_file_path == "":
+    if not build_out_notice_file_path:
         build_out_notice_file_path = os.path.join(build_out_path, "obj")
 
     read_module_info_from_build_output_file()
