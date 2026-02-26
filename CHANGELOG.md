@@ -1,5 +1,14 @@
 # Changelog
 
+## v5.0.12 (26/02/2026)
+## Changes
+## 🔧 Maintenance
+
+- Update version requirements for FOSSLight packages  @soimkim (#53)
+- Add .coderabbit.yaml configuration file for review @soimkim (#52)
+
+---
+
 ## v5.0.11 (24/09/2025)
 ## Changes
 ## 🐛 Hotfixes
