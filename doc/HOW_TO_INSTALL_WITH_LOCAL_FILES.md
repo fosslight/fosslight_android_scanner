@@ -10,7 +10,7 @@
 ## Prerequisite (network access is available)
 > Files to prepare in advance in an environment where network access is available.
 1. fosslight_android.zip : A zip file that compressed the fosslight_android source.
-2. Python-3.7.13.tgz : Python source file
+2. Python-3.10.20.tgz : Python source file
 3. virtualenv_pkg.tar.gz : Python packages for virtualenv 
 4. fosslight_android_pkg.tar.gz : Python packages for fosslight_android 
 
@@ -19,7 +19,7 @@ How to set up python and virtualenv : https://fosslight.org/fosslight-guide-en/s
 
 ### Download python source
 ```
-$ wget https://www.python.org/ftp/python/3.7.13/Python-3.7.13.tgz
+$ wget https://www.python.org/ftp/python/3.10.20/Python-3.10.20.tgz
 ```
 ### Download packages for virtualenv
 ```
@@ -31,55 +31,55 @@ $ tar cvfz virtualenv_pkg.tar.gz virtualenv_pkg/*
 ### Download packages for fosslight_android
 ```
 $ unzip fosslight_android.zip
-$ ls fosslight_android/requirements.txt
+$ ls fosslight_android/pyproject.toml
 $ mkdir fosslight_android_pkg
 $ cd fosslight_android_pkg
-$ pip download -r ../fosslight_android/requirements.txt
+$ pip download ../fosslight_android
 $ tar cvfz fosslight_android_pkg.tar.gz fosslight_android_pkg/*
 ```
 ## Install fosslight_android with files (network access is not available)
 > The file prepared in **prerequisite** is required.
 
-### Install Python-3.7.13
+### Install Python-3.10.20
 
 ```
 $ mkdir ~/bin/python
-$ tar zxfv Python-3.7.13.tgz
-$ cd Python-3.7.13
+$ tar zxfv Python-3.10.20.tgz
+$ cd Python-3.10.20
 $ ./configure --with-ssl --prefix=$HOME/bin/python
 $ make
 $ make install
 ```
-### (Optional) Make .profile_python3.7 for PATH enviroment
+### (Optional) Make .profile_python3.10 for PATH enviroment
 
 For use only when necessary (if you do not have sudo privileges and want to separate from other build environments)
 
 ```
-$ vi .profile_python3.7
+$ vi .profile_python3.10
 if [ -z "$MY_PYTHONE3_PATH" ] ; then
         export MY_PYTHONE3_PATH=$HOME/.local/bin:$HOME/bin/python/bin
         PATH="$MY_PYTHONE3_PATH:$PATH"
 fi
 
-$ source .profile_python3.7
+$ source .profile_python3.10
 $ python3 --version
-Python 3.7.13
+Python 3.10.20
 ```
 
 ### Install virtualenv
 
 ```
-$ source .profile_python3.7
+$ source .profile_python3.10
 $ tar xvfz virtualenv_pkg.tar.gz 
 $ cd virtualenv_pkg
 $ ls | xargs pip install --no-index --find-links .
 $ cd ~
-$ virtualenv -p ~/bin/python/bin/python3.7 venv
+$ virtualenv -p ~/bin/python/bin/python3.10 venv
 ```
 
 ### Install fosslight_android
 ```bash
-$ source .profile_python3.7
+$ source .profile_python3.10
 $ source venv/bin/activate
 (venv) $ tar xfvz fosslight_android_pkg.tar.gz
 (venv) $ cd fosslight_android_pkg

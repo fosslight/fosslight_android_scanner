@@ -136,7 +136,6 @@ def find_bin_license_info():
 
 
 def get_module_json_obj_by_installed_path(module_name, binary_name_with_path, binary_name_only):
-    global module_info_json_obj
 
     if module_name == "" or binary_name_with_path == "":
         return ""
@@ -376,7 +375,6 @@ def find_notice_html(bin_info, return_list):
 
 
 def map_binary_module_name_and_path(installed_file_list):
-    global final_bin_info
 
     for out_binary in installed_file_list:
         file_name_with_relative_path = out_binary.replace(build_out_path + "/", "")
@@ -410,7 +408,6 @@ def check_already_exist(bin):
 
 
 def filter_non_path_bin(FIND_DIRECTORY_MODE):
-    global final_bin_info
     filter_file_type = ['.oat', '.art', '.hyb', '.dat', '.xml', '.odex', '.sh']
     bin_info_list = final_bin_info[:]
     need_to_find = {}
@@ -528,7 +525,6 @@ def get_repositories_name():
 
 
 def set_mk_file_path():
-    global final_bin_info
     cwd = os.getcwd() + "/"
     for item in final_bin_info:
         local_path = item.source_code_path
@@ -722,7 +718,6 @@ def return_shorter_installed_path_data(origin, new):
 
 
 def set_oss_name_by_repository():
-    global final_bin_info
     success = get_repositories_name()
     if success:
         for item in final_bin_info:
@@ -739,7 +734,6 @@ def set_oss_name_by_repository():
 
 
 def find_meta_lic_files():
-    global meta_lic_files
     dir = os.path.join(build_out_path, "obj")
     for current_dir_path, current_subdirs, current_files in os.walk(dir):
         for aFile in current_files:
