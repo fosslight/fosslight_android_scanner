@@ -796,7 +796,7 @@ def main():
     now = datetime.now().strftime('%y%m%d_%H%M')
     log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
     result_excel_file_name = os.path.join(python_script_dir, f"fosslight_report_android_{now}")
-    result_notice_zip_file_name = os.path.join(python_script_dir, f"notice_to_fosslight-hub_{now}.zip")
+    result_notice_zip_file_name = os.path.join(python_script_dir, f"notice_to_fosslight_hub_{now}.zip")
     remove_list_file = ""
 
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
