@@ -66,7 +66,6 @@ def read_packaging_config():
 
 
 def check_pkg_files_recursively(path):
-    global prohibited_file_names, prohibited_file_extensions, prohibited_path_list, failed_to_read_path
     path_to_check = path
     result = True
 
