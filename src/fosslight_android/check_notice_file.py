@@ -14,7 +14,7 @@ import gzip
 import shutil
 
 logger = logging.getLogger(LOGGER_NAME)
-CANNOT_FIND_MSG = "CANNOT_FIND_NOTICE_HTML"
+CANNOT_FIND_MSG = "CANNOT_FIND_NOTICE"
 
 
 def run_notice_html_checklist(binary_file, check_type, notice_file):
