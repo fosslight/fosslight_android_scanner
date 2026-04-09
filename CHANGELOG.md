@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.0.13 (09/04/2026)
+## Changes
+## 🔧 Maintenance
+
+- Update missing notice file message and notice zip filename @soimkim (#57)
+- Update help message format for FOSSLight Android Scanner @bjk7119 (#55)
+- feat(python): add Python 3.13/3.14 support @soimkim (#56)
+- Remove "Type of change" section from PR default template @woocheol-lge (#54)
+
+---
+
 ## v5.0.12 (26/02/2026)
 ## Changes
 ## 🔧 Maintenance
