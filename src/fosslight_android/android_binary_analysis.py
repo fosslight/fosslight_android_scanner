@@ -832,6 +832,8 @@ def main():
 
     logger, result_log = init_log(log_txt_file, True, logging.INFO, logging.DEBUG, PKG_NAME)
 
+    logger.info(f"Tool Info : {result_log['Tool Info']}")
+
     if args.packaging:
         check_packaging_files(args.packaging)
         return
