@@ -8,7 +8,9 @@ import sys
 from datetime import datetime
 import os
 import re
+import glob
 import json
+import xml.etree.ElementTree as ET
 import logging
 import zipfile
 import shutil
@@ -193,21 +195,99 @@ def read_module_info_from_build_output_file():
         sys.exit(1)
 
 
-def set_env_variables_from_result_log():
+def _normalize_manifest_revision(rev):
+    if not rev:
+        return ''
+    r = rev.strip()
+    for prefix in ('refs/tags/', 'refs/heads/'):
+        if r.startswith(prefix):
+            r = r[len(prefix):]
+    if r.startswith('android-'):
+        r = r[len('android-'):]
+    # e.g. 12.1.0_r5 -> 12.1.0 (drop AOSP tag revision suffix)
+    r = re.sub(r'_r\d+$', '', r, flags=re.IGNORECASE)
+    return r
+
+
+def _revision_from_manifest_root(root):
+    for tag in ('default', 'superproject', 'project'):
+        for elem in root.findall(tag):
+            if elem.get('remote') != 'aosp':
+                continue
+            rev = elem.get('revision')
+            if rev:
+                normalized = _normalize_manifest_revision(rev)
+                if normalized:
+                    return normalized
+    return ''
+
+
+def try_extract_platform_version_from_repo_manifest(android_root):
+    """Prefer platform identity from .repo/manifests (remote=aosp), same scope as grep."""
+    android_root = os.path.abspath(android_root)
+    manifests_dir = os.path.join(android_root, '.repo', 'manifests')
+    if not os.path.isdir(manifests_dir):
+        return ''
+    xml_files = sorted(glob.glob(os.path.join(manifests_dir, '*.xml')))
+    if not xml_files:
+        return ''
+    matched_files = []
+    try:
+        completed = subprocess.run(
+            ['grep', '-l', 'remote="aosp"'] + xml_files,
+            capture_output=True, text=True, timeout=120)
+        if completed.returncode == 0:
+            matched_files = [ln.strip() for ln in completed.stdout.splitlines() if ln.strip()]
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        matched_files = []
+
+    if not matched_files:
+        matched_files = xml_files
+
+    for xml_path in matched_files:
+        try:
+            tree = ET.parse(xml_path)
+            rev = _revision_from_manifest_root(tree.getroot())
+            if rev:
+                return rev
+        except ET.ParseError:
+            continue
+    return ''
+
+
+def set_env_variables_from_result_log(android_src_path):
     global build_out_path, build_out_notice_file_path, platform_version
 
-    # Check the platform version
-    for line in android_log_lines:
-        try:
-            line = line.strip()
-            pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+)\.?\d*\S*\s*')
-            matched = pattern.match(line)
-            if matched is not None:
-                platform_version = matched.group(1)
-                break
+    pv_manifest = try_extract_platform_version_from_repo_manifest(android_src_path)
+    platform_version_source = ""
+    if pv_manifest:
+        platform_version = pv_manifest
+        platform_version_source = "repo manifest (remote=aosp)"
+    else:
+        for line in android_log_lines:
+            try:
+                line = line.strip()
+                pattern = re.compile(r'.*PLATFORM_VERSION\s*=\s*(\d+)\.?\d*\S*\s*')
+                matched = pattern.match(line)
+                if matched is not None:
+                    platform_version = matched.group(1)
+                    platform_version_source = "build log (PLATFORM_VERSION=)"
+                    break
 
-        except Exception:
-            pass
+            except Exception:
+                pass
+
+    if platform_version:
+        logger.info(
+            "Platform version: %s (from %s)",
+            platform_version,
+            platform_version_source,
+        )
+    else:
+        logger.warning(
+            "Platform version not found in repo manifest or build log "
+            "(PLATFORM_VERSION=)."
+        )
 
     # FIND a NOTICE file and build out path
     pattern_notice = r'\[.*?\]\s*build\s+(([^\s]*?)/obj/NOTICE\.(?:xml(?:\.gz)?|html|txt))'
@@ -845,7 +925,7 @@ def main():
         logger.error("(-a option) Fail to read a file:" + ANDROID_LOG_FILE_NAME)
         sys.exit(1)
     else:
-        set_env_variables_from_result_log()
+        set_env_variables_from_result_log(android_src_path)
 
     map_binary_module_name_and_path(find_binaries_from_out_dir())
 
