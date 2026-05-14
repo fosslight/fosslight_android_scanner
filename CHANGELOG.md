@@ -1,5 +1,17 @@
 # Changelog
 
+## v5.0.14 (14/05/2026)
+## Changes
+## 🚀 Features
+
+- Print platform version from AOSP repo manifest @soimkim (#59)
+
+## 🔧 Maintenance
+
+- Add scanner version log at startup @woocheol-lge (#58)
+
+---
+
 ## v5.0.13 (09/04/2026)
 ## Changes
 ## 🔧 Maintenance
