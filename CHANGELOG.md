@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.0.15 (10/07/2026)
+## Changes
+## 🔧 Maintenance
+
+- Align report and log timestamps with fosslight_util time helpers @bjk7119 (#62)
+- Migrate to REUSE.toml and update GitHub Actions @woocheol-lge (#61)
+- Add LGE_NOTICE.txt for testing @soimkim (#60)
+
+---
+
 ## v5.0.14 (14/05/2026)
 ## Changes
 ## 🚀 Features
