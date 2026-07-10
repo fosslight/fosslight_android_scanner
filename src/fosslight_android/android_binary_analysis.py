@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import sys
-from datetime import datetime
 import os
 import re
 import glob
@@ -48,14 +47,15 @@ from ._common import (
     NOTICE_FILE_NAME,
     PKG_NAME
 )
-import yaml
 from ._help import print_help_msg, print_version
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_binary.binary_analysis import return_bin_only
 import argparse
 from pathlib import Path
+from fosslight_util.cover import dump_result_log
 from fosslight_util.oss_item import ScannerItem
 from fosslight_util.output_format import write_output_file
+from fosslight_util.time import current_timestamp_utc, timestamp_for_filename
 
 EXCEPTIONAL_PATH = [r"(/)+gen/META/lic_intermediates/"]
 android_log_lines = []
@@ -73,7 +73,7 @@ platform_version = ""  # Android Version. ex- 7.0.0.r1 -> 7.0
 # Define Const Variables
 ANDROID_LOG_FILE_NAME = "android.log"
 num_cores = 1
-now = ""
+file_time = ""
 HIDDEN_HEADER = {'TLSH', "SHA1"}
 HEADER = {'BIN (Android)': ['ID', 'Binary Path', 'Source Path', 'Notice', 'OSS Name',
                             'OSS Version', 'License', 'Download Location', 'Homepage',
@@ -514,7 +514,7 @@ def filter_non_path_bin(FIND_DIRECTORY_MODE):
             pass
 
     if FIND_DIRECTORY_MODE:
-        get_path_by_using_find(need_to_find, build_out_path, f"FIND_RESULT_OF_BINARIES_{now}.txt", python_script_dir)
+        get_path_by_using_find(need_to_find, build_out_path, f"FIND_RESULT_OF_BINARIES_{file_time}.txt", python_script_dir)
 
 
 def search_binaries_by_bin_name_and_checksum(bin_name_to_search, bin_checksum_to_search):
@@ -699,7 +699,7 @@ def get_checksum_tlsh(bin_info_list, return_bin_list):
 
 def remove_duplicated_binaries_by_checking_checksum(remove_list_file):
     global final_bin_info
-    result_file_name = f"REMOVED_BIN_BY_DUPLICATION_{now}.txt"
+    result_file_name = f"REMOVED_BIN_BY_DUPLICATION_{file_time}.txt"
     str_bin_removed = ""
     filtered_binaries = []
     checked_file_name = {}
@@ -860,7 +860,7 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
 
 
 def main():
-    global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, now, logger, final_bin_info
+    global android_log_lines, ANDROID_LOG_FILE_NAME, python_script_dir, num_cores, file_time, logger, final_bin_info
     find_empty_path = False
     auto_fill_oss_name = True
     analyze_source = False
@@ -871,12 +871,13 @@ def main():
     if num_cores < 1:
         num_cores = 1
 
+    start_time = current_timestamp_utc()
+    file_time = timestamp_for_filename(start_time)
     python_script_dir = os.getcwd()
     android_src_path = python_script_dir
-    now = datetime.now().strftime('%y%m%d_%H%M')
-    log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{now}.txt")
-    result_excel_file_name = os.path.join(python_script_dir, f"fosslight_report_android_{now}")
-    result_notice_zip_file_name = os.path.join(python_script_dir, f"notice_to_fosslight_hub_{now}.zip")
+    log_txt_file = os.path.join(python_script_dir, f"fosslight_log_android_{file_time}.txt")
+    result_excel_file_name = os.path.join(python_script_dir, f"fosslight_report_android_{file_time}")
+    result_notice_zip_file_name = os.path.join(python_script_dir, f"notice_to_fosslight_hub_{file_time}.zip")
     remove_list_file = ""
 
     parser = argparse.ArgumentParser(description='FOSSLight Android', prog='fosslight_android', add_help=False)
@@ -941,13 +942,16 @@ def main():
         set_oss_name_by_repository()
     if analyze_source:
         from ._src_analysis import find_item_to_analyze
-        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, now, path_to_exclude)
+        final_bin_info = find_item_to_analyze(final_bin_info, python_script_dir, file_time, path_to_exclude)
 
-    scan_item = ScannerItem(PKG_NAME, now)
+    scan_item = ScannerItem(PKG_NAME, start_time)
     scan_item.set_cover_pathinfo(android_src_path, "")
 
     scan_item.set_cover_comment(f"Total number of binaries: {len(final_bin_info)}")
     scan_item.set_cover_comment(notice_result_comment)
+
+    finish_time = current_timestamp_utc()
+    scan_item.set_cover_finish_time(finish_time)
 
     scan_item.append_file_items(final_bin_info, PKG_NAME)
     success, msg, result_file = write_output_file(result_excel_file_name, RESULT_FILE_EXTENSION,
@@ -957,10 +961,10 @@ def main():
     result_log["Output FOSSLight Report"] = f"{result_file}"
 
     # Print the result
+    result_log["Running time"] = scan_item.cover.running_time
     result_log["Output Directory"] = python_script_dir
     try:
-        str_final_result_log = yaml.safe_dump(result_log, allow_unicode=True, sort_keys=True)
-        logger.info(str_final_result_log)
+        logger.info(dump_result_log(result_log))
     except Exception as ex:
         logger.warning(f"Failed to print result log. : {ex}")
 
