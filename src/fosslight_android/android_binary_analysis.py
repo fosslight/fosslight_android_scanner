@@ -24,7 +24,6 @@ import urllib.request
 import multiprocessing
 import parmap
 import numpy as np
-from functools import partial
 from fosslight_util.set_log import init_log
 from ._util import (
     read_file,
@@ -665,9 +664,7 @@ def set_checksum_tlsh_and_get_oss_from_db_after_remove_duplication(remove_list_f
     final_bin_info = return_list[:]
     remove_duplicated_binaries_by_checking_checksum(remove_list_file)
 
-    func = partial(get_oss_info_from_db, platform_version)
-    return_oss_list = do_multi_process(func, final_bin_info)
-    final_bin_info = return_oss_list[:]
+    final_bin_info = get_oss_info_from_db(final_bin_info)
 
 
 def get_checksum_tlsh(bin_info_list, return_bin_list):
