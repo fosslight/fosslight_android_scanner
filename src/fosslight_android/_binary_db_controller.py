@@ -18,7 +18,7 @@ logger = logging.getLogger(LOGGER_NAME)
 DEFAULT_KB_URL = "http://fosslight-kb.lge.com/"
 _BINARY_MATCH_PATH = "/binary/match"
 _HTTP_TIMEOUT_SEC = 120
-_CHUNK_SIZE = int(os.environ.get("BINARY_MATCH_CHUNK_SIZE", "3000"))
+_CHUNK_SIZE = int(os.environ.get("BINARY_MATCH_CHUNK_SIZE", "1000"))
 
 MatchKey = Tuple[str, str]
 
