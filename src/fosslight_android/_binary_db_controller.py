@@ -100,6 +100,9 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
     if not items_payload:
         return bin_info_list
 
+    endpoint = f"{base_url.rstrip('/')}{_BINARY_MATCH_PATH}"
+    logger.info(f"Querying KB binary match: {endpoint}")
+
     results_by_id = {}
     try:
         for chunk_start in range(0, len(items_payload), _CHUNK_SIZE):
@@ -107,10 +110,12 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
             response = _post_binary_match(base_url, token, chunk)
             if response is None:
                 return bin_info_list
+            if chunk_start == 0:
+                logger.info(f"KB({base_url}) reachable")
             for result in response.get("results", []):
                 results_by_id[str(result.get("id"))] = result
     except Exception as error:
-        logger.warning(f"Binary match API failed: {error}")
+        logger.warning(f"KB({base_url}) binary match API failed: {error}")
         return bin_info_list
 
     for item in bin_info_list:
@@ -148,8 +153,14 @@ def _post_binary_match(kb_url: str, kb_token: str, items: list) -> Optional[dict
             body = ex.read().decode()
         except Exception:
             pass
-        logger.warning(f"Binary match HTTP {ex.code}: {body or ex.reason}")
+        # Host responded → reachable, but match request failed
+        logger.warning(
+            f"KB({kb_url}) reachable but binary match HTTP {ex.code}: {body or ex.reason}"
+        )
         return None
     except urllib.error.URLError as ex:
-        logger.debug(f"Binary match unreachable: {ex}")
+        logger.warning(f"KB({kb_url}) Unreachable: {ex.reason if hasattr(ex, 'reason') else ex}")
+        return None
+    except Exception as ex:
+        logger.warning(f"KB({kb_url}) binary match failed: {ex}")
         return None
