@@ -23,7 +23,7 @@ _HTTP_TIMEOUT_SEC = 120
 _CHUNK_SIZE = int(os.environ.get("BINARY_MATCH_CHUNK_SIZE", "1000"))
 
 MatchKey = Tuple[str, str]
-# (response_or_None, stop_remaining) — stop on unreachable or HTTP 404
+# (response_or_None, stop_remaining) — stop on unreachable, HTTP 404, or HTTP 401
 PostMatchResult = Tuple[Optional[dict], bool]
 
 
@@ -104,8 +104,6 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
     if not items_payload:
         return bin_info_list
 
-    logger.info(f"Querying KB binary match: {base_url.rstrip('/')}{_BINARY_MATCH_PATH}")
-
     results_by_id = {}
     kb_reachable_logged = False
     try:
@@ -117,7 +115,7 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
             chunk = items_payload[chunk_start: chunk_start + _CHUNK_SIZE]
             response, stop_remaining = _post_binary_match(base_url, token, chunk)
             if stop_remaining:
-                # Unreachable or /binary/match missing (404) — do not retry chunks
+                # Unreachable, auth denied (401), or /binary/match missing (404)
                 break
             if not kb_reachable_logged:
                 logger.debug(f"KB({base_url}) reachable")
@@ -150,7 +148,8 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
 def _post_binary_match(kb_url: str, kb_token: str, items: list) -> PostMatchResult:
     """POST one chunk. Returns (body, stop_remaining).
 
-    stop_remaining is True for host unreachable or HTTP 404 (endpoint missing).
+    stop_remaining is True for host unreachable, HTTP 401 (auth denied),
+    or HTTP 404 (endpoint missing).
     """
     data = json.dumps({"items": items}).encode("utf-8")
     request = urllib.request.Request(
@@ -173,10 +172,14 @@ def _post_binary_match(kb_url: str, kb_token: str, items: list) -> PostMatchResu
             body = ex.read().decode()
         except Exception:
             pass
-        if ex.code == 404:
+        if ex.code in (401, 404):
+            reason = (
+                "auth denied (HTTP 401)"
+                if ex.code == 401
+                else "endpoint not found (HTTP 404)"
+            )
             logger.warning(
-                f"KB({kb_url}) binary match endpoint not found (HTTP 404); "
-                "skipping remaining chunks."
+                f"KB({kb_url}) binary match {reason}; skipping remaining chunks."
             )
             return None, True
         # Other HTTP errors → reachable; caller may continue with next chunks
