@@ -1,5 +1,21 @@
 # Changelog
 
+## v5.1.0 (31/07/2026)
+## Changes
+## 🚀 Features
+
+- Replace Binary DB direct access with ldb_service API @soimkim (#63)
+
+## 🐛 Hotfixes
+
+- Parse NOTICE.xml with lxml XML parser @soimkim (#64)
+
+## 🔧 Maintenance
+
+- Show binary match progress and abort on HTTP 404 @soimkim (#65)
+
+---
+
 ## v5.0.15 (10/07/2026)
 ## Changes
 ## 🔧 Maintenance
