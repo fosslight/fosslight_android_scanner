@@ -42,6 +42,11 @@ def _is_unknown_checksum(checksum: str) -> bool:
     return (not checksum) or checksum == CONST_TLSH_NULL
 
 
+def _is_unknown_tlsh(tlsh: str) -> bool:
+    """True when tlsh was not computed (empty or CONST_TLSH_NULL)."""
+    return (not tlsh) or tlsh == CONST_TLSH_NULL
+
+
 def _match_key(filename: str, checksum: str, index: int) -> MatchKey:
     """Dedupe key. Unknown checksums stay unique per list index (no filename-only merge)."""
     if _is_unknown_checksum(checksum):
@@ -53,6 +58,7 @@ def _build_deduped_payload(bin_info_list) -> Tuple[List[dict], Dict[MatchKey, st
     """Deduplicate by filename+checksum; return API payload and key→api_id map.
 
     Items with empty/\"0\" checksum are not deduped — each keeps its own API entry.
+    Items with both checksum and tlsh unknown are omitted (nothing to match).
     """
     key_to_id: Dict[MatchKey, str] = {}
     items_payload: List[dict] = []
@@ -60,6 +66,9 @@ def _build_deduped_payload(bin_info_list) -> Tuple[List[dict], Dict[MatchKey, st
     for index, item in enumerate(bin_info_list):
         filename = _item_filename(item)
         checksum = item.checksum or ""
+        tlsh = item.tlsh or CONST_TLSH_NULL
+        if _is_unknown_checksum(checksum) and _is_unknown_tlsh(tlsh):
+            continue
         key = _match_key(filename, checksum, index)
         if not _is_unknown_checksum(checksum) and key in key_to_id:
             continue
@@ -69,7 +78,7 @@ def _build_deduped_payload(bin_info_list) -> Tuple[List[dict], Dict[MatchKey, st
             "id": api_id,
             "filename": filename,
             "checksum": checksum,
-            "tlsh": item.tlsh or CONST_TLSH_NULL,
+            "tlsh": tlsh,
         })
 
     return items_payload, key_to_id
