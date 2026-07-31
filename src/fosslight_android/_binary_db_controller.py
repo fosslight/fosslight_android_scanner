@@ -10,6 +10,8 @@ import urllib.error
 import urllib.request
 from typing import Dict, List, Optional, Tuple
 
+from tqdm import tqdm
+
 from ._common import CONST_TLSH_NULL
 from fosslight_util.constant import LOGGER_NAME
 
@@ -21,7 +23,7 @@ _HTTP_TIMEOUT_SEC = 120
 _CHUNK_SIZE = int(os.environ.get("BINARY_MATCH_CHUNK_SIZE", "1000"))
 
 MatchKey = Tuple[str, str]
-# (response_or_None, unreachable) — unreachable stops remaining chunks
+# (response_or_None, stop_remaining) — stop on unreachable or HTTP 404
 PostMatchResult = Tuple[Optional[dict], bool]
 
 
@@ -103,19 +105,23 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
         return bin_info_list
 
     endpoint = f"{base_url.rstrip('/')}{_BINARY_MATCH_PATH}"
-    logger.info(f"Querying KB binary match: {endpoint}")
+    logger.info(f"Querying KB binary match")
 
     results_by_id = {}
     kb_reachable_logged = False
     try:
-        for chunk_start in range(0, len(items_payload), _CHUNK_SIZE):
+        for chunk_start in tqdm(
+            range(0, len(items_payload), _CHUNK_SIZE),
+            desc="Binary DB match",
+            unit="chunk",
+        ):
             chunk = items_payload[chunk_start: chunk_start + _CHUNK_SIZE]
-            response, unreachable = _post_binary_match(base_url, token, chunk)
-            if unreachable:
-                # Host not reachable — do not attempt remaining chunks
+            response, stop_remaining = _post_binary_match(base_url, token, chunk)
+            if stop_remaining:
+                # Unreachable or /binary/match missing (404) — do not retry chunks
                 break
             if not kb_reachable_logged:
-                logger.info(f"KB({base_url}) reachable")
+                logger.debug(f"KB({base_url}) reachable")
                 kb_reachable_logged = True
             if response is None:
                 logger.warning(
@@ -143,7 +149,10 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
 
 
 def _post_binary_match(kb_url: str, kb_token: str, items: list) -> PostMatchResult:
-    """POST one chunk. Returns (body, unreachable). unreachable stops further chunks."""
+    """POST one chunk. Returns (body, stop_remaining).
+
+    stop_remaining is True for host unreachable or HTTP 404 (endpoint missing).
+    """
     data = json.dumps({"items": items}).encode("utf-8")
     request = urllib.request.Request(
         f"{kb_url.rstrip('/')}{_BINARY_MATCH_PATH}",
@@ -165,7 +174,13 @@ def _post_binary_match(kb_url: str, kb_token: str, items: list) -> PostMatchResu
             body = ex.read().decode()
         except Exception:
             pass
-        # Host responded → reachable; caller may continue with next chunks
+        if ex.code == 404:
+            logger.warning(
+                f"KB({kb_url}) binary match endpoint not found (HTTP 404); "
+                "skipping remaining chunks."
+            )
+            return None, True
+        # Other HTTP errors → reachable; caller may continue with next chunks
         logger.debug(
             f"KB({kb_url}) reachable but binary match HTTP {ex.code}: {body or ex.reason}"
         )
