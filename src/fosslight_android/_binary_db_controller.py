@@ -166,13 +166,13 @@ def _post_binary_match(kb_url: str, kb_token: str, items: list) -> PostMatchResu
         except Exception:
             pass
         # Host responded → reachable; caller may continue with next chunks
-        logger.warning(
+        logger.debug(
             f"KB({kb_url}) reachable but binary match HTTP {ex.code}: {body or ex.reason}"
         )
         return None, False
     except urllib.error.URLError as ex:
-        logger.warning(f"KB({kb_url}) Unreachable: {ex.reason if hasattr(ex, 'reason') else ex}")
+        logger.debug(f"KB({kb_url}) Unreachable: {ex.reason if hasattr(ex, 'reason') else ex}")
         return None, True
     except Exception as ex:
-        logger.warning(f"KB({kb_url}) binary match failed: {ex}")
+        logger.debug(f"KB({kb_url}) binary match failed: {ex}")
         return None, False
