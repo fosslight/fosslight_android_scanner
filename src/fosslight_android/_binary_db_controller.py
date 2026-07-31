@@ -21,6 +21,8 @@ _HTTP_TIMEOUT_SEC = 120
 _CHUNK_SIZE = int(os.environ.get("BINARY_MATCH_CHUNK_SIZE", "1000"))
 
 MatchKey = Tuple[str, str]
+# (response_or_None, unreachable) — unreachable stops remaining chunks
+PostMatchResult = Tuple[Optional[dict], bool]
 
 
 def resolve_kb_config(kb_url: str = "", kb_token: str = "") -> Tuple[str, str]:
@@ -104,34 +106,44 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
     logger.info(f"Querying KB binary match: {endpoint}")
 
     results_by_id = {}
+    kb_reachable_logged = False
     try:
         for chunk_start in range(0, len(items_payload), _CHUNK_SIZE):
             chunk = items_payload[chunk_start: chunk_start + _CHUNK_SIZE]
-            response = _post_binary_match(base_url, token, chunk)
-            if response is None:
-                return bin_info_list
-            if chunk_start == 0:
+            response, unreachable = _post_binary_match(base_url, token, chunk)
+            if unreachable:
+                # Host not reachable — do not attempt remaining chunks
+                break
+            if not kb_reachable_logged:
                 logger.info(f"KB({base_url}) reachable")
+                kb_reachable_logged = True
+            if response is None:
+                logger.warning(
+                    f"Binary match chunk failed "
+                    f"({chunk_start}:{chunk_start + len(chunk)}); "
+                    "keeping results so far and continuing with next chunks."
+                )
+                continue
             for result in response.get("results", []):
                 results_by_id[str(result.get("id"))] = result
     except Exception as error:
         logger.warning(f"KB({base_url}) binary match API failed: {error}")
-        return bin_info_list
 
     for item in bin_info_list:
         try:
             key = _match_key(_item_filename(item), item.checksum or "")
             api_id = key_to_id.get(key)
-            if api_id is None:
+            if api_id is None or api_id not in results_by_id:
                 continue
-            _apply_match_result_to_item(item, results_by_id.get(api_id))
+            _apply_match_result_to_item(item, results_by_id[api_id])
         except Exception as error:
             logger.warning(f"READ OSS :{error}")
 
     return bin_info_list
 
 
-def _post_binary_match(kb_url: str, kb_token: str, items: list) -> Optional[dict]:
+def _post_binary_match(kb_url: str, kb_token: str, items: list) -> PostMatchResult:
+    """POST one chunk. Returns (body, unreachable). unreachable stops further chunks."""
     data = json.dumps({"items": items}).encode("utf-8")
     request = urllib.request.Request(
         f"{kb_url.rstrip('/')}{_BINARY_MATCH_PATH}",
@@ -146,21 +158,21 @@ def _post_binary_match(kb_url: str, kb_token: str, items: list) -> Optional[dict
     try:
         with urllib.request.urlopen(request, timeout=_HTTP_TIMEOUT_SEC) as response:
             body = response.read().decode()
-            return json.loads(body) if body else {}
+            return (json.loads(body) if body else {}), False
     except urllib.error.HTTPError as ex:
         body = ""
         try:
             body = ex.read().decode()
         except Exception:
             pass
-        # Host responded → reachable, but match request failed
+        # Host responded → reachable; caller may continue with next chunks
         logger.warning(
             f"KB({kb_url}) reachable but binary match HTTP {ex.code}: {body or ex.reason}"
         )
-        return None
+        return None, False
     except urllib.error.URLError as ex:
         logger.warning(f"KB({kb_url}) Unreachable: {ex.reason if hasattr(ex, 'reason') else ex}")
-        return None
+        return None, True
     except Exception as ex:
         logger.warning(f"KB({kb_url}) binary match failed: {ex}")
-        return None
+        return None, False
