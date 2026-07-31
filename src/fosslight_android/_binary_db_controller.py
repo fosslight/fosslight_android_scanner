@@ -104,8 +104,7 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
     if not items_payload:
         return bin_info_list
 
-    endpoint = f"{base_url.rstrip('/')}{_BINARY_MATCH_PATH}"
-    logger.info(f"Querying KB binary match")
+    logger.info(f"Querying KB binary match: {base_url.rstrip('/')}{_BINARY_MATCH_PATH}")
 
     results_by_id = {}
     kb_reachable_logged = False
