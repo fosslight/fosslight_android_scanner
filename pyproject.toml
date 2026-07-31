@@ -32,7 +32,6 @@ dependencies = [
     "numpy",
     "pandas",
     "parmap",
-    "psycopg2-binary>=2.9.10",
     "python-dateutil",
     "py-tlsh",
     "pytz",
