@@ -37,20 +37,31 @@ def _item_filename(item) -> str:
     return item.binary_name_without_path or os.path.basename(item.bin_name)
 
 
-def _match_key(filename: str, checksum: str) -> MatchKey:
-    return filename, checksum or ""
+def _is_unknown_checksum(checksum: str) -> bool:
+    """True when checksum was not computed (empty or CONST_TLSH_NULL)."""
+    return (not checksum) or checksum == CONST_TLSH_NULL
+
+
+def _match_key(filename: str, checksum: str, index: int) -> MatchKey:
+    """Dedupe key. Unknown checksums stay unique per list index (no filename-only merge)."""
+    if _is_unknown_checksum(checksum):
+        return filename, f"__unknown_{index}"
+    return filename, checksum
 
 
 def _build_deduped_payload(bin_info_list) -> Tuple[List[dict], Dict[MatchKey, str]]:
-    """Deduplicate by filename+checksum; return API payload and key→api_id map."""
+    """Deduplicate by filename+checksum; return API payload and key→api_id map.
+
+    Items with empty/\"0\" checksum are not deduped — each keeps its own API entry.
+    """
     key_to_id: Dict[MatchKey, str] = {}
     items_payload: List[dict] = []
 
-    for item in bin_info_list:
+    for index, item in enumerate(bin_info_list):
         filename = _item_filename(item)
         checksum = item.checksum or ""
-        key = _match_key(filename, checksum)
-        if key in key_to_id:
+        key = _match_key(filename, checksum, index)
+        if not _is_unknown_checksum(checksum) and key in key_to_id:
             continue
         api_id = str(len(items_payload))
         key_to_id[key] = api_id
@@ -132,9 +143,9 @@ def get_oss_info_from_db(bin_info_list, kb_url: str = "", kb_token: str = ""):
     except Exception as error:
         logger.warning(f"KB({base_url}) binary match API failed: {error}")
 
-    for item in bin_info_list:
+    for index, item in enumerate(bin_info_list):
         try:
-            key = _match_key(_item_filename(item), item.checksum or "")
+            key = _match_key(_item_filename(item), item.checksum or "", index)
             api_id = key_to_id.get(key)
             if api_id is None or api_id not in results_by_id:
                 continue
