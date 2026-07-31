@@ -584,7 +584,8 @@ def get_repositories_name():
     # Get repository name from manifest first.
     read_success, manifest_content = read_file(".repo/manifest.xml", True)
     if read_success:
-        soup = BeautifulSoup(manifest_content, "lxml")
+        # manifest.xml is XML — use lxml XML parser (not HTML "lxml")
+        soup = BeautifulSoup(manifest_content, "lxml-xml")
         for remote_info in soup.findAll("remote"):
             if str(remote_info['review']).find("android-review.googlesource.com") > -1:  # Only in case of aosp
                 remote_is_aosp = True

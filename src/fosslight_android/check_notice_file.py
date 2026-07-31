@@ -144,7 +144,8 @@ def read_notice_file(notice_file_path):
 
 def parsing_notice_xml_format(notice_file_content):
     file_list = {}
-    soup = BeautifulSoup(notice_file_content, "lxml")
+    # NOTICE.xml is XML — use lxml XML parser (not HTML "lxml")
+    soup = BeautifulSoup(notice_file_content, "lxml-xml")
 
     for e in soup.findAll("file-name"):  # NOTICE.xml
         line = e.text.strip()
