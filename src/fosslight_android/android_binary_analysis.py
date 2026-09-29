@@ -342,6 +342,13 @@ def set_env_variables_from_result_log(android_src_path):
     read_module_info_from_build_output_file()
 
 
+def _add_find_cmd(cmd_list, directory, cmd):
+    if os.path.isdir(directory):
+        cmd_list.append(cmd)
+        return
+    logger.info("Skip missing binary search path: %s", directory)
+
+
 def find_binaries_from_out_dir():
     global build_out_path
 
@@ -351,25 +358,32 @@ def find_binaries_from_out_dir():
 
     system_path = os.path.join(build_out_path, "system")
     root_path = os.path.join(build_out_path, "root")
-    obj_static_lib = os.path.join(build_out_path, "obj/STATIC_LIBRARIES")
     font_path = os.path.join(build_out_path, "system/fonts")
-    cmd_list = [
+    cmd_list = []
+    _add_find_cmd(
+        cmd_list, system_path,
         "find " + system_path + " -type f -exec file \"{}\" \\; | "
         "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | "
-        "grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\'",
+        "grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\'")
+    _add_find_cmd(
+        cmd_list, root_path,
         "find " + root_path + " -type f -exec file \"{}\" \\; | "
-        "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | awk -F\":\" \'{print $1}\' ",
+        "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | awk -F\":\" \'{print $1}\' ")
+    _add_find_cmd(
+        cmd_list, build_out_path,
         "find " + build_out_path + " -maxdepth 1 -type f -exec file \"{}\" \\; | grep data$ |"
-        " grep -v .img  | awk -F\":\" \'{print $1}\' ",
-        "find " + obj_static_lib + " -type f -exec file \"{}\" \\; | egrep \"ar archive\" | awk -F\":\" \'{print $1}\' ",
-        f"find {build_out_path} ! \\( \\( -type d -path {system_path}"
-        f" -o -path {root_path} -o -path \'{build_out_path}"
-        f"/obj*\' -o -path {build_out_path}/symbols -o -path \'"
-        f"{build_out_path}/factory_*\' -o -path {build_out_path}"
-        "/dex_bootjars \\) -prune \\)  -type f -exec file \"{}\" \\; | egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | "
-        "grep -v \"\\.o:\" | grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\' ",
-        "find " + font_path + " -type f -exec file \"{}\" \\; | egrep \"font\" | awk -F\":\" \'{print $1}\'"
-    ]
+        " grep -v .img  | awk -F\":\" \'{print $1}\' ")
+    if os.path.isdir(build_out_path):
+        cmd_list.append(
+            f"find {build_out_path} ! \\( \\( -type d -path {system_path}"
+            f" -o -path {root_path} -o -path \'{build_out_path}"
+            f"/obj*\' -o -path {build_out_path}/symbols -o -path \'"
+            f"{build_out_path}/factory_*\' -o -path {build_out_path}"
+            "/dex_bootjars \\) -prune \\)  -type f -exec file \"{}\" \\; | egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | "
+            "grep -v \"\\.o:\" | grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\' ")
+    _add_find_cmd(
+        cmd_list, font_path,
+        "find " + font_path + " -type f -exec file \"{}\" \\; | egrep \"font\" | awk -F\":\" \'{print $1}\'")
 
     return_list = do_multi_process(find_binary, cmd_list)
     tmp_files = []
@@ -507,8 +521,6 @@ def map_binary_module_name_and_path(installed_file_list):
 
     for out_binary in installed_file_list:
         file_name_with_relative_path = out_binary.replace(build_out_path + "/", "")
-        if "obj/STATIC_LIBRARIES/" in file_name_with_relative_path:
-            file_name_with_relative_path = os.path.basename(file_name_with_relative_path)
         file_name = os.path.basename(file_name_with_relative_path)
         index_of_dot = file_name.rfind('.')
         if index_of_dot > -1:
