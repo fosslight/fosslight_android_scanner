@@ -349,12 +349,6 @@ def _add_find_cmd(cmd_list, directory, cmd):
     logger.info("Skip missing binary search path: %s", directory)
 
 
-def _soong_intermediates_path(product_out):
-    # out/target/product/<device> -> out/soong/.intermediates
-    out_dir = os.path.dirname(os.path.dirname(os.path.dirname(product_out)))
-    return os.path.join(out_dir, "soong", ".intermediates")
-
-
 def find_binaries_from_out_dir():
     global build_out_path
 
@@ -364,7 +358,6 @@ def find_binaries_from_out_dir():
 
     system_path = os.path.join(build_out_path, "system")
     root_path = os.path.join(build_out_path, "root")
-    obj_static_lib = os.path.join(build_out_path, "obj/STATIC_LIBRARIES")
     font_path = os.path.join(build_out_path, "system/fonts")
     cmd_list = []
     _add_find_cmd(
@@ -380,20 +373,6 @@ def find_binaries_from_out_dir():
         cmd_list, build_out_path,
         "find " + build_out_path + " -maxdepth 1 -type f -exec file \"{}\" \\; | grep data$ |"
         " grep -v .img  | awk -F\":\" \'{print $1}\' ")
-    if os.path.isdir(obj_static_lib):
-        _add_find_cmd(
-            cmd_list, obj_static_lib,
-            "find " + obj_static_lib + " -type f -exec file \"{}\" \\; | "
-            "egrep \"ar archive\" | awk -F\":\" \'{print $1}\' ")
-    else:
-        # Android 17 drops Make obj/STATIC_LIBRARIES. Target .a files live in Soong.
-        # Plain android_*_static only: skip cfi, apex, and afdo variant copies.
-        soong_intermediates = _soong_intermediates_path(build_out_path)
-        logger.info("STATIC_LIBRARIES not found. Search Soong static libs: %s", soong_intermediates)
-        _add_find_cmd(
-            cmd_list, soong_intermediates,
-            "find " + soong_intermediates + " -regextype posix-extended -type f "
-            "-regex '.*/android_[^/]*_static/[^/]*\\.a$'")
     if os.path.isdir(build_out_path):
         cmd_list.append(
             f"find {build_out_path} ! \\( \\( -type d -path {system_path}"
@@ -542,9 +521,6 @@ def map_binary_module_name_and_path(installed_file_list):
 
     for out_binary in installed_file_list:
         file_name_with_relative_path = out_binary.replace(build_out_path + "/", "")
-        if ("obj/STATIC_LIBRARIES/" in file_name_with_relative_path
-                or ("/soong/.intermediates/" in out_binary and out_binary.endswith(".a"))):
-            file_name_with_relative_path = os.path.basename(out_binary)
         file_name = os.path.basename(file_name_with_relative_path)
         index_of_dot = file_name.rfind('.')
         if index_of_dot > -1:
