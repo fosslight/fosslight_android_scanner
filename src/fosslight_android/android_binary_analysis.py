@@ -349,6 +349,17 @@ def _add_find_cmd(cmd_list, directory, cmd):
     logger.info("Skip missing binary search path: %s", directory)
 
 
+def _find_file_cmd(find_expr, output_filter):
+    # {} + runs file on many paths per process. \; forks one file per path.
+    return f"find {find_expr} -exec file {{}} + | {output_filter}"
+
+
+_ELF_FILE_FILTER = (
+    "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | "
+    "grep -v \"\\.odex:\" | awk -F\":\" '{print $1}'"
+)
+
+
 def find_binaries_from_out_dir():
     global build_out_path
 
@@ -362,28 +373,30 @@ def find_binaries_from_out_dir():
     cmd_list = []
     _add_find_cmd(
         cmd_list, system_path,
-        "find " + system_path + " -type f -exec file \"{}\" \\; | "
-        "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | "
-        "grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\'")
+        _find_file_cmd(f"{system_path} -type f", _ELF_FILE_FILTER))
     _add_find_cmd(
         cmd_list, root_path,
-        "find " + root_path + " -type f -exec file \"{}\" \\; | "
-        "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | awk -F\":\" \'{print $1}\' ")
+        _find_file_cmd(
+            f"{root_path} -type f",
+            "egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | grep -v \"\\.o:\" | awk -F\":\" '{print $1}'"))
     _add_find_cmd(
         cmd_list, build_out_path,
-        "find " + build_out_path + " -maxdepth 1 -type f -exec file \"{}\" \\; | grep data$ |"
-        " grep -v .img  | awk -F\":\" \'{print $1}\' ")
+        _find_file_cmd(
+            f"{build_out_path} -maxdepth 1 -type f",
+            "grep data$ | grep -v .img | awk -F\":\" '{print $1}'"))
     if os.path.isdir(build_out_path):
-        cmd_list.append(
-            f"find {build_out_path} ! \\( \\( -type d -path {system_path}"
-            f" -o -path {root_path} -o -path \'{build_out_path}"
-            f"/obj*\' -o -path {build_out_path}/symbols -o -path \'"
-            f"{build_out_path}/factory_*\' -o -path {build_out_path}"
-            "/dex_bootjars \\) -prune \\)  -type f -exec file \"{}\" \\; | egrep \"ELF\\ |ARM,|\\.jar|\\.apk\" | "
-            "grep -v \"\\.o:\" | grep -v \"\\.odex:\" | awk -F\":\" \'{print $1}\' ")
+        cmd_list.append(_find_file_cmd(
+            f"{build_out_path} ! \\( \\( -type d -path {system_path}"
+            f" -o -path {root_path} -o -path '{build_out_path}"
+            f"/obj*' -o -path {build_out_path}/symbols -o -path '"
+            f"{build_out_path}/factory_*' -o -path {build_out_path}"
+            "/dex_bootjars \\) -prune \\) -type f",
+            _ELF_FILE_FILTER))
     _add_find_cmd(
         cmd_list, font_path,
-        "find " + font_path + " -type f -exec file \"{}\" \\; | egrep \"font\" | awk -F\":\" \'{print $1}\'")
+        _find_file_cmd(
+            f"{font_path} -type f",
+            "egrep \"font\" | awk -F\":\" '{print $1}'"))
 
     return_list = do_multi_process(find_binary, cmd_list)
     tmp_files = []
