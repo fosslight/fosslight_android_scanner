@@ -66,8 +66,8 @@ logger = logging.getLogger(LOGGER_NAME)
 final_bin_info = []
 module_info_json_obj = {}
 build_out_path = ""  # ex -out/target/product/generic/
-build_out_notice_file_path = ""  # build out/target/product/generic/obj/NOTICE.html
-installed_notice_paths = []  # on-target notices, e.g. system/etc/NOTICE.xml.gz
+# obj/NOTICE.* (str), <product>/obj (str), or Install paths (str or list)
+build_out_notice_file_path = ""
 notice_file_list = {}  # Save file list in NOTICE.html
 platform_version = ""  # Android Version. ex- 7.0.0.r1 -> 7.0
 
@@ -257,8 +257,8 @@ def try_extract_platform_version_from_repo_manifest(android_root):
 
 
 def set_env_variables_from_result_log(android_src_path):
-    global build_out_path, build_out_notice_file_path, installed_notice_paths, platform_version
-    installed_notice_paths = []
+    global build_out_path, build_out_notice_file_path, platform_version
+    build_out_notice_file_path = ""
 
     pv_manifest = try_extract_platform_version_from_repo_manifest(android_src_path)
     platform_version_source = ""
@@ -298,6 +298,7 @@ def set_env_variables_from_result_log(android_src_path):
     pattern_notice = rf'\[.*?\]\s*build\s+(([^\s]*?)/obj/NOTICE\.{notice_suffix})(?!\S)'
     # Android 17+: "[...] Install: <product>/<partition>/etc/NOTICE.<ext>"
     pattern_notice_install = rf'\[.*?\]\s*Install:\s+(\S+/NOTICE\.{notice_suffix})(?!\S)'
+    installed_from_log = []
     seen_install = set()
     for line in reversed(android_log_lines):
         match = re.search(pattern_notice, line)
@@ -309,7 +310,7 @@ def set_env_variables_from_result_log(android_src_path):
             path = inst.group(1)
             if path not in seen_install:
                 seen_install.add(path)
-                installed_notice_paths.append(path)
+                installed_from_log.append(path)
 
     if not build_out_path:
         pattern = re.compile(r'.*Installed file list:\s*([^\s]+)')
@@ -325,12 +326,18 @@ def set_env_variables_from_result_log(android_src_path):
             logger.error("Can't find a build output path.")
             sys.exit(1)
 
-    # Legacy obj/NOTICE log line is absent on Android 17. Use the installed
-    # Notice paths from "Install:" lines instead of falling back to obj/.
-    if not build_out_notice_file_path and not installed_notice_paths:
+    # Legacy obj/NOTICE log line is absent on Android 17. Keep the installed
+    # Notice paths in the same variable instead of falling back to obj/.
+    if not build_out_notice_file_path and installed_from_log:
+        build_out_notice_file_path = (
+            installed_from_log if len(installed_from_log) > 1 else installed_from_log[0]
+        )
+        logger.info(
+            "Notice file from build log (Install): %s",
+            ", ".join(installed_from_log),
+        )
+    elif not build_out_notice_file_path:
         build_out_notice_file_path = os.path.join(build_out_path, "obj")
-    elif not build_out_notice_file_path and installed_notice_paths:
-        logger.info("Notice file from build log (Install): %s", ", ".join(installed_notice_paths))
 
     read_module_info_from_build_output_file()
 
@@ -427,23 +434,32 @@ def get_result_of_notice_html(found_on_html, notice_file_found):
         return "nok"
 
 
+def _notice_paths():
+    if isinstance(build_out_notice_file_path, (list, tuple)):
+        return list(build_out_notice_file_path)
+    if build_out_notice_file_path:
+        return [build_out_notice_file_path]
+    return []
+
+
+def _read_notice_at(path):
+    # obj/ holds several NOTICE files. system/etc does not: sibling xml is unrelated.
+    normalized = path.rstrip("/")
+    parent_name = os.path.basename(os.path.dirname(normalized))
+    if os.path.basename(normalized) == "obj" or parent_name == "obj":
+        return read_notice_file(os.path.abspath(path))
+    return read_single_notice_file(os.path.abspath(path))
+
+
 def find_notice_value(notice_zip_dest_file=""):
     global notice_file_list, final_bin_info
     notice_file_comment = "Notice file not found."
 
     try:
-        if build_out_notice_file_path:
-            # obj/NOTICE (or obj/ fallback): also pick up sibling NOTICE files.
-            notice_paths = [build_out_notice_file_path]
-            read_notice = read_notice_file
-        else:
-            # Installed partition notices. Read each file only.
-            notice_paths = list(installed_notice_paths)
-            read_notice = read_single_notice_file
         notice_file_list = {}
         notice_files = []
-        for notice_path in notice_paths:
-            found_list, found_files = read_notice(os.path.abspath(notice_path))
+        for notice_path in _notice_paths():
+            found_list, found_files = _read_notice_at(notice_path)
             if found_list:
                 notice_file_list.update(found_list)
             for found_file in found_files:
