@@ -84,7 +84,7 @@ def _is_xml_notice(file_name):
 
 
 def _read_notice_text(file_name):
-    encodings = ["latin-1", "utf-8", "utf-16"]
+    encodings = ["utf-8", "utf-16", "latin-1"]
     is_gz = file_name.endswith(".gz")
     for encoding_option in encodings:
         try:
