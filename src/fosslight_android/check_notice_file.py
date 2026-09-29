@@ -15,6 +15,9 @@ import shutil
 
 logger = logging.getLogger(LOGGER_NAME)
 CANNOT_FIND_MSG = "CANNOT_FIND_NOTICE"
+# On-target and obj/ NOTICE filenames. Android does not fix one extension:
+# NOTICE.xml.gz (Android 17 partition install), NOTICE.html(.gz), NOTICE.txt(.gz).
+_NOTICE_FILE_SUFFIXES = (".xml.gz", ".html.gz", ".txt.gz", ".xml", ".html", ".txt")
 
 
 def run_notice_html_checklist(binary_file, check_type, notice_file):
@@ -73,8 +76,39 @@ def find_bin_in_notice(binary_file_name, notice_file_list):
     return notice_found
 
 
+def _is_xml_notice(file_name):
+    base = os.path.basename(file_name)
+    if base.endswith(".gz"):
+        base = base[:-3]
+    return base.endswith(".xml")
+
+
+def _read_notice_text(file_name):
+    encodings = ["latin-1", "utf-8", "utf-16"]
+    is_gz = file_name.endswith(".gz")
+    for encoding_option in encodings:
+        try:
+            if is_gz:
+                file = gzip.open(file_name, "rt", encoding=encoding_option)
+            else:
+                file = open(file_name, encoding=encoding_option)
+            file_content = file.read()
+            file.close()
+            if file_content != "":
+                return file_content
+        except Exception:
+            pass
+    return ""
+
+
+def _parse_notice_content(file_name, file_content):
+    if _is_xml_notice(file_name):
+        return parsing_notice_xml_format(file_content)
+    return parsing_notice_html_format(file_content)
+
+
 def find_files_by_extension(path):
-    extensions = ['.html', '.xml']
+    extensions = ['.html', '.xml', '.txt']
     GZ_EXTENSION = '.gz'
     files = []
     try:
@@ -89,7 +123,14 @@ def find_files_by_extension(path):
         logger.info(f"Fail unzip gz file:{error}")
 
     for extension in extensions:
-        files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(extension)]
+        files = []
+        for file_name in os.listdir(path):
+            if not file_name.endswith(extension):
+                continue
+            # .txt is common for unrelated files. Only NOTICE*.txt is a notice index.
+            if extension == '.txt' and not file_name.startswith('NOTICE'):
+                continue
+            files.append(os.path.join(path, file_name))
         if len(files) > 0:
             break
 
@@ -98,13 +139,11 @@ def find_files_by_extension(path):
 
 def read_notice_file(notice_file_path):
     final_notice_file = {}
-    # NOTICE.html need to be skipped the errors related to decode
-    encodings = ["latin-1", "utf-8", "utf-16"]
     notice_files = []
 
     if os.path.isfile(notice_file_path):
         notice_files.append(notice_file_path)
-        if notice_file_path.endswith((".xml", ".html", ".txt", "xml.gz")):
+        if notice_file_path.endswith(_NOTICE_FILE_SUFFIXES):
             notice_file_path = os.path.dirname(notice_file_path)
 
     if os.path.isdir(notice_file_path):
@@ -114,32 +153,37 @@ def read_notice_file(notice_file_path):
             notice_files = list(set(notice_files))
 
     for file_name in notice_files:
-        file_list = {}
-        file_content = ""
-        if os.path.isfile(file_name):
-            for encoding_option in encodings:
-                try:
-                    file = open(file_name, encoding=encoding_option)
-                    file_content = file.read()
-                    file.close()
-                    if file_content != "":
-                        break
-                except Exception:
-                    pass
-            if file_content != "":
-                try:
-                    if file_name.endswith("xml"):
-                        file_list = parsing_notice_xml_format(file_content)
-                    else:
-                        file_list = parsing_notice_html_format(file_content)
-                except Exception as error:
-                    logger.info("Can't read a notice. :" + file_name)
-                    logger.info(f"{error}")
-                final_notice_file.update(file_list)
-            else:
-                logger.info(f"Notice file is empty. :{file_name}")
+        found_list = _load_one_notice_file(file_name)
+        final_notice_file.update(found_list)
 
     return final_notice_file, notice_files
+
+
+def read_single_notice_file(notice_file_path):
+    """Read one installed NOTICE file. Do not scan the parent directory.
+
+    Partition install paths such as system/etc/NOTICE.xml.gz sit next to
+    unrelated xml/txt files. A directory scan would treat those as notices.
+    """
+    if not os.path.isfile(notice_file_path):
+        return {}, []
+    return _load_one_notice_file(notice_file_path), [notice_file_path]
+
+
+def _load_one_notice_file(file_name):
+    file_list = {}
+    if not os.path.isfile(file_name):
+        return file_list
+    file_content = _read_notice_text(file_name)
+    if file_content != "":
+        try:
+            file_list = _parse_notice_content(file_name, file_content)
+        except Exception as error:
+            logger.info("Can't read a notice. :" + file_name)
+            logger.info(f"{error}")
+    else:
+        logger.info(f"Notice file is empty. :{file_name}")
+    return file_list
 
 
 def parsing_notice_xml_format(notice_file_content):
