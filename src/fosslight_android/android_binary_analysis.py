@@ -12,6 +12,7 @@ import json
 import xml.etree.ElementTree as ET
 import logging
 import zipfile
+import gzip
 import shutil
 # Parsing NOTICE
 from bs4 import BeautifulSoup
@@ -914,6 +915,19 @@ def find_meta_lic_files():
                         meta_lic_files[key] = lic
 
 
+def _notice_zip_basename(file_path):
+    name_path = file_path[:-3] if file_path.endswith('.gz') else file_path
+    return os.path.basename(name_path)
+
+
+def _notice_zip_arcname(file_path, use_path):
+    # .gz is stored uncompressed. A colliding basename uses the path with / -> _.
+    name_path = file_path[:-3] if file_path.endswith('.gz') else file_path
+    if use_path:
+        return name_path.replace('/', '_')
+    return os.path.basename(name_path)
+
+
 def create_and_copy_notice_zip(notice_files_list, zip_file_path):
     final_destination_file_name = ""
 
@@ -924,9 +938,16 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
         final_destination_file_name = destination_path
         logger.debug(f"Notice file is copied to '{destination_path}'.")
     else:
+        basenames = [_notice_zip_basename(path) for path in notice_files_list]
         with zipfile.ZipFile(zip_file_path, 'w') as zipf:
             for single_file_path in notice_files_list:
-                zipf.write(single_file_path, arcname=os.path.basename(single_file_path))
+                use_path = basenames.count(_notice_zip_basename(single_file_path)) > 1
+                arcname = _notice_zip_arcname(single_file_path, use_path)
+                if single_file_path.endswith('.gz'):
+                    with gzip.open(single_file_path, 'rb') as gz_file:
+                        zipf.writestr(arcname, gz_file.read())
+                else:
+                    zipf.write(single_file_path, arcname=arcname)
         final_destination_file_name = zip_file_path
 
     return final_destination_file_name
