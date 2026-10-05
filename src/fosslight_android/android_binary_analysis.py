@@ -937,6 +937,21 @@ def _notice_zip_arcname(file_path, use_path):
     return os.path.basename(name_path)
 
 
+def _deduplicate_notice_zip_arcname(arcname, used_arcnames):
+    if arcname not in used_arcnames:
+        used_arcnames.add(arcname)
+        return arcname
+
+    name, extension = os.path.splitext(arcname)
+    suffix = 2
+    unique_arcname = f"{name}_{suffix}{extension}"
+    while unique_arcname in used_arcnames:
+        suffix += 1
+        unique_arcname = f"{name}_{suffix}{extension}"
+    used_arcnames.add(unique_arcname)
+    return unique_arcname
+
+
 def create_and_copy_notice_zip(notice_files_list, zip_file_path):
     final_destination_file_name = ""
 
@@ -948,10 +963,12 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
         logger.debug(f"Notice file is copied to '{destination_path}'.")
     else:
         basenames = [_notice_zip_basename(path) for path in notice_files_list]
+        used_arcnames = set()
         with zipfile.ZipFile(zip_file_path, 'w') as zipf:
             for single_file_path in notice_files_list:
                 use_path = basenames.count(_notice_zip_basename(single_file_path)) > 1
                 arcname = _notice_zip_arcname(single_file_path, use_path)
+                arcname = _deduplicate_notice_zip_arcname(arcname, used_arcnames)
                 if single_file_path.endswith('.gz'):
                     with gzip.open(single_file_path, 'rb') as gz_file:
                         zipf.writestr(arcname, gz_file.read())
