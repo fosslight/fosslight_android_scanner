@@ -44,3 +44,22 @@ def test_notice_zip_member_names_are_unique_after_path_flattening(tmp_path, monk
         assert set(notice_zip.read(name) for name in member_names) == {
             content for _, content in notice_files
         }
+
+
+@pytest.mark.run
+@pytest.mark.release
+def test_notice_zip_removes_partial_archive_when_gzip_is_invalid(tmp_path):
+    plain_notice = tmp_path / "plain" / "NOTICE.xml"
+    invalid_gzip_notice = tmp_path / "compressed" / "NOTICE.xml.gz"
+    plain_notice.parent.mkdir()
+    invalid_gzip_notice.parent.mkdir()
+    plain_notice.write_bytes(b"plain notice")
+    invalid_gzip_notice.write_bytes(b"not a gzip stream")
+    zip_file = tmp_path / "notices.zip"
+
+    result = create_and_copy_notice_zip(
+        [str(plain_notice), str(invalid_gzip_notice)], str(zip_file)
+    )
+
+    assert result == ""
+    assert not zip_file.exists()

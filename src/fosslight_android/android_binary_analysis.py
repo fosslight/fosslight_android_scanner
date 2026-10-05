@@ -964,16 +964,26 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
     else:
         basenames = [_notice_zip_basename(path) for path in notice_files_list]
         used_arcnames = set()
-        with zipfile.ZipFile(zip_file_path, 'w') as zipf:
-            for single_file_path in notice_files_list:
-                use_path = basenames.count(_notice_zip_basename(single_file_path)) > 1
-                arcname = _notice_zip_arcname(single_file_path, use_path)
-                arcname = _deduplicate_notice_zip_arcname(arcname, used_arcnames)
-                if single_file_path.endswith('.gz'):
-                    with gzip.open(single_file_path, 'rb') as gz_file:
-                        zipf.writestr(arcname, gz_file.read())
-                else:
-                    zipf.write(single_file_path, arcname=arcname)
+        try:
+            with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+                for single_file_path in notice_files_list:
+                    use_path = basenames.count(_notice_zip_basename(single_file_path)) > 1
+                    arcname = _notice_zip_arcname(single_file_path, use_path)
+                    arcname = _deduplicate_notice_zip_arcname(arcname, used_arcnames)
+                    if single_file_path.endswith('.gz'):
+                        with gzip.open(single_file_path, 'rb') as gz_file:
+                            zipf.writestr(arcname, gz_file.read())
+                    else:
+                        zipf.write(single_file_path, arcname=arcname)
+        except (OSError, EOFError) as error:
+            logger.debug(f"Failed to compress Notice file: {error}")
+            try:
+                os.remove(zip_file_path)
+            except FileNotFoundError:
+                pass
+            except OSError as cleanup_error:
+                logger.debug(f"Failed to remove incomplete Notice zip: {cleanup_error}")
+            return ""
         final_destination_file_name = zip_file_path
 
     return final_destination_file_name
