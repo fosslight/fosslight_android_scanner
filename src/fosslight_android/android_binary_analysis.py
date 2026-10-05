@@ -920,11 +920,20 @@ def _notice_zip_basename(file_path):
     return os.path.basename(name_path)
 
 
+def _strip_android_src_path(file_path):
+    # Notice paths are absolute. The android source root is the cwd, so drop it
+    # to keep only the build relative part in the zip entry name.
+    android_src_path = os.getcwd().rstrip('/') + '/'
+    if file_path.startswith(android_src_path):
+        return file_path[len(android_src_path):]
+    return file_path.lstrip('/')
+
+
 def _notice_zip_arcname(file_path, use_path):
     # .gz is stored uncompressed. A colliding basename uses the path with / -> _.
     name_path = file_path[:-3] if file_path.endswith('.gz') else file_path
     if use_path:
-        return name_path.replace('/', '_')
+        return _strip_android_src_path(name_path).replace('/', '_')
     return os.path.basename(name_path)
 
 
