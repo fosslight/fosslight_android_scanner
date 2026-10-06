@@ -12,6 +12,7 @@ import json
 import xml.etree.ElementTree as ET
 import logging
 import zipfile
+import gzip
 import shutil
 # Parsing NOTICE
 from bs4 import BeautifulSoup
@@ -914,6 +915,43 @@ def find_meta_lic_files():
                         meta_lic_files[key] = lic
 
 
+def _notice_zip_basename(file_path):
+    name_path = file_path[:-3] if file_path.endswith('.gz') else file_path
+    return os.path.basename(name_path)
+
+
+def _strip_android_src_path(file_path):
+    # Notice paths are absolute. The android source root is the cwd, so drop it
+    # to keep only the build relative part in the zip entry name.
+    android_src_path = os.getcwd().rstrip('/') + '/'
+    if file_path.startswith(android_src_path):
+        return file_path[len(android_src_path):]
+    return file_path.lstrip('/')
+
+
+def _notice_zip_arcname(file_path, use_path):
+    # .gz is stored uncompressed. A colliding basename uses the path with / -> _.
+    name_path = file_path[:-3] if file_path.endswith('.gz') else file_path
+    if use_path:
+        return _strip_android_src_path(name_path).replace('/', '_')
+    return os.path.basename(name_path)
+
+
+def _deduplicate_notice_zip_arcname(arcname, used_arcnames):
+    if arcname not in used_arcnames:
+        used_arcnames.add(arcname)
+        return arcname
+
+    name, extension = os.path.splitext(arcname)
+    suffix = 2
+    unique_arcname = f"{name}_{suffix}{extension}"
+    while unique_arcname in used_arcnames:
+        suffix += 1
+        unique_arcname = f"{name}_{suffix}{extension}"
+    used_arcnames.add(unique_arcname)
+    return unique_arcname
+
+
 def create_and_copy_notice_zip(notice_files_list, zip_file_path):
     final_destination_file_name = ""
 
@@ -924,9 +962,28 @@ def create_and_copy_notice_zip(notice_files_list, zip_file_path):
         final_destination_file_name = destination_path
         logger.debug(f"Notice file is copied to '{destination_path}'.")
     else:
-        with zipfile.ZipFile(zip_file_path, 'w') as zipf:
-            for single_file_path in notice_files_list:
-                zipf.write(single_file_path, arcname=os.path.basename(single_file_path))
+        basenames = [_notice_zip_basename(path) for path in notice_files_list]
+        used_arcnames = set()
+        try:
+            with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+                for single_file_path in notice_files_list:
+                    use_path = basenames.count(_notice_zip_basename(single_file_path)) > 1
+                    arcname = _notice_zip_arcname(single_file_path, use_path)
+                    arcname = _deduplicate_notice_zip_arcname(arcname, used_arcnames)
+                    if single_file_path.endswith('.gz'):
+                        with gzip.open(single_file_path, 'rb') as gz_file:
+                            zipf.writestr(arcname, gz_file.read())
+                    else:
+                        zipf.write(single_file_path, arcname=arcname)
+        except (OSError, EOFError) as error:
+            logger.debug(f"Failed to compress Notice file: {error}")
+            try:
+                os.remove(zip_file_path)
+            except FileNotFoundError:
+                pass
+            except OSError as cleanup_error:
+                logger.debug(f"Failed to remove incomplete Notice zip: {cleanup_error}")
+            return ""
         final_destination_file_name = zip_file_path
 
     return final_destination_file_name
